@@ -9,6 +9,9 @@ const PORT = 3000;
 //const nfsPath = '\\\\192.168.100.25\\data\\menus';
 const nfsPath = path.join(__dirname, 'prueba_nfs');
 
+const cors = require('cors');
+app.use(cors());
+
 // Función para leer un archivo JSON
 async function readJsonFile(filePath) {
   try {
