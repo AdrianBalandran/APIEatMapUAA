@@ -1,0 +1,22 @@
+[
+ {
+  "Id_Ingrediente": 1,
+  "Nombre": "Pechuga de Pollo"
+},
+ {
+  "Id_Ingrediente": 2,
+  "Nombre": "Carne de Res"
+},
+ {
+  "Id_Ingrediente": 3,
+  "Nombre": "Lechuga"
+},
+ {
+  "Id_Ingrediente": 4,
+  "Nombre": "Queso"
+},
+ {
+  "Id_Ingrediente": 5,
+  "Nombre": "Huevos"
+}
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "Id_Sucursal": 1,
+  "Nombre": "Sucursal Norte"
+},
+ {
+  "Id_Sucursal": 2,
+  "Nombre": "Sucursal Sur"
+},
+ {
+  "Id_Sucursal": 3,
+  "Nombre": "Sucursal Central"
+}
+]

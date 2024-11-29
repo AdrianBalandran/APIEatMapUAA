@@ -1,0 +1,34 @@
+[
+ {
+  "Id_Ingrediente": 4,
+  "Id_Comida": 1
+},
+ {
+  "Id_Ingrediente": 4,
+  "Id_Comida": 2
+},
+ {
+  "Id_Ingrediente": 1,
+  "Id_Comida": 3
+},
+ {
+  "Id_Ingrediente": 2,
+  "Id_Comida": 3
+},
+ {
+  "Id_Ingrediente": 4,
+  "Id_Comida": 3
+},
+ {
+  "Id_Ingrediente": 3,
+  "Id_Comida": 4
+},
+ {
+  "Id_Ingrediente": 5,
+  "Id_Comida": 6
+},
+ {
+  "Id_Ingrediente": 4,
+  "Id_Comida": 5
+}
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "Id_Cafeteria": 1,
+  "Id_Sucursal": 1,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 1
+},
+ {
+  "Id_Cafeteria": 1,
+  "Id_Sucursal": 3,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 10
+}
+]

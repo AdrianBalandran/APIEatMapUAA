@@ -31,3 +31,26 @@ app.get('/menus', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
   }
 });
+
+app.get('/usuarios', async (req, res) => {
+  try {
+    // Leer los archivos
+    const sucursales = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const menus = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+
+    // Combinar los datos usando las llaves foráneas
+    const menusConSucursal = menus.map(menu => {
+      const sucursal = sucursales.find(cat => cat.Id_Comida === menu.Cafeteria_Sucursal);
+      return {
+        ...menu,
+        sucursal: sucursal ? sucursal.Nombre : null // Añadir el nombre de la sucursal
+      };
+    });
+
+    res.json(menusConSucursal);
+  } 
+  catch (err) {
+    console.error('Error leyendo los archivos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});

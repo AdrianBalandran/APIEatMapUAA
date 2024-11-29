@@ -6,7 +6,8 @@ const app = express();
 const PORT = 3000;
 
 // Ruta al directorio NFS
-const nfsPath = '\\\\192.168.100.25\\data\\menus';
+//const nfsPath = '\\\\192.168.100.25\\data\\menus';
+const nfsPath = path.join(__dirname, 'prueba_nfs');
 
 // Función para leer un archivo JSON
 async function readJsonFile(filePath) {

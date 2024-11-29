@@ -1,0 +1,44 @@
+[
+ {
+  "Id_Comida": 1,
+  "Nombre":"Guajolotas",
+  "Precio":45.50,
+  "Cafeteria_Sucursal":1,
+  "TiempoPrepa":"10 minutos"
+},
+ {
+  "Id_Comida": 2,
+  "Nombre":"Chilaquiles",
+  "Precio":40.00,
+  "Cafeteria_Sucursal":1,
+  "TiempoPrepa":"4 minutos"
+},
+ {
+  "Id_Comida": 3,
+  "Nombre":"Hamburguesa",
+  "Precio":93.90,
+  "Cafeteria_Sucursal":1,
+  "TiempoPrepa":"20 minutos"
+},
+ {
+  "Id_Comida": 4,
+  "Nombre":"Ensalada",
+  "Precio":34.22,
+  "Cafeteria_Sucursal":1,
+  "TiempoPrepa":"2 minutos"
+},
+ {
+  "Id_Comida": 5,
+  "Nombre":"Quesadillas",
+  "Precio":34.20,
+  "Cafeteria_Sucursal":1,
+  "TiempoPrepa":"12 minutos"
+},
+ {
+  "Id_Comida": 6,
+  "Nombre":"Especial de Desayuno",
+  "Precio":75.00,
+  "Cafeteria_Sucursal":1,
+  "TiempoPrepa":"22 minutos"
+}
+]

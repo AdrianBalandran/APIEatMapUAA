@@ -1,0 +1,32 @@
+[
+ {
+  "Id_Usuario": 1,
+  "Nombre": "Gustavo",
+  "Primer_Apellido": "Avendaño",
+  "Segundo_Apellido": "Guevara",
+  "Contrasena": "123",
+  "Telefono": "449123456789",
+  "Email": "al250884@edu.uaa.mx",
+  "Tipo": "Admin"
+},
+{
+  "Id_Usuario": 2,
+  "Nombre": "Juan",
+  "Primer_Apellido": "Perez",
+  "Segundo_Apellido": "González",
+  "Contrasena": "456",
+  "Telefono": "449987654321",
+  "Email": "al295778@edu.uaa.mx",
+  "Tipo": "Encargado"
+},
+{
+  "Id_Usuario": 3,
+  "Nombre": "Jaime",
+  "Primer_Apellido": "Trujillo",
+  "Segundo_Apellido": "Dominguez",
+  "Contrasena": "789",
+  "Telefono": "449123459876",
+  "Email": "al904457@edu.uaa.mx",
+  "Tipo": "Cliente"
+}
+]
