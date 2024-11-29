@@ -130,6 +130,19 @@ app.get('/comidasxingredientes', async (req, res) => {
       res.status(500).json({ error: "Error al procesar la solicitud." });
     }
   });
+
+
+  app.get('/usuarios', async (req, res) => {
+    try {
+      // Leer el archivo
+      const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+      
+      res.json(usuarios);
+    } catch (err) {
+      console.error('Error al procesar los datos:', err);
+      res.status(500).json({ error: 'Error al cargar los datos' });
+    }
+  });
   
 
 // Iniciar el servidor
