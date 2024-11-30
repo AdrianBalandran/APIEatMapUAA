@@ -86,53 +86,86 @@ app.get('/cafeterias', async (req, res) => {
     }
   });
 
-  // Ruta para obtener comidas según ingredientes
+// Ruta para obtener comidas según ingredientes o nombres
 app.get('/comidasxingredientes', async (req, res) => {
-    try {
-      // Obtener el parámetro de consulta (lista de ingredientes)
-      const { ingredientes } = req.query; // Ejemplo: ?ingredientes=1,4
-      if (!ingredientes) {
-        return res.status(400).json({ error: "Se requiere una lista de ingredientes." });
-      }
-  
-      // Convertir los ingredientes a un array de números
+  try {
+    // Obtener los parámetros de consulta
+    const { ingredientes, nombre } = req.query;
+
+    // Leer los archivos JSON
+    const ingredientesData = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+    const comidaData = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+    const comidaIngreData = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
+
+    let comidasFiltradas = comidaData;
+
+    // Filtrar por ingredientes si se proporciona el parámetro
+    if (ingredientes) {
       const ingredientesIds = ingredientes.split(',').map(Number);
-  
-      // Leer los archivos JSON
-      const ingredientesData = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
-      const comidaData = await readJsonFile(path.join(nfsPath, 'TComida.json'));
-      const comidaIngreData = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
-  
+
       // Filtrar las relaciones que coincidan con los ingredientes
       const comidasFiltradasIds = comidaIngreData
         .filter(rel => ingredientesIds.includes(rel.Id_Ingrediente))
         .map(rel => rel.Id_Comida);
-  
+
       // Eliminar duplicados de IDs de comidas
       const comidasUnicasIds = [...new Set(comidasFiltradasIds)];
-  
-      // Obtener los datos completos de las comidas
-      const comidasFiltradas = comidaData.filter(comida => comidasUnicasIds.includes(comida.Id_Comida));
-  
-      // Añadir los nombres de los ingredientes usados a cada comida
-      const comidasConIngredientes = comidasFiltradas.map(comida => {
-        const ingredientesDeLaComida = comidaIngreData
-          .filter(rel => rel.Id_Comida === comida.Id_Comida)
-          .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
-  
-        return {
-          ...comida,
-          Ingredientes: ingredientesDeLaComida
-        };
-      });
-  
-      // Responder con las comidas filtradas
-      res.json(comidasConIngredientes);
-    } catch (err) {
-      console.error('Error obteniendo las comidas:', err);
-      res.status(500).json({ error: "Error al procesar la solicitud." });
+
+      // Filtrar las comidas por los IDs obtenidos
+      comidasFiltradas = comidasFiltradas.filter(comida => comidasUnicasIds.includes(comida.Id_Comida));
     }
-  });
+
+    // Filtrar por nombre de comida o ingrediente si se proporciona el parámetro
+    if (nombre) {
+      const nombreLower = nombre.toLowerCase();
+
+      // Filtrar las comidas por nombre
+      comidasFiltradas = comidasFiltradas.filter(comida =>
+        comida.Nombre.toLowerCase().includes(nombreLower)
+      );
+
+      // Agregar las comidas relacionadas con los ingredientes que coincidan con el nombre
+      const ingredientesCoincidentes = ingredientesData.filter(ing =>
+        ing.Nombre.toLowerCase().includes(nombreLower)
+      );
+
+      if (ingredientesCoincidentes.length > 0) {
+        const ingredienteIds = ingredientesCoincidentes.map(ing => ing.Id_Ingrediente);
+
+        // Obtener IDs de comidas relacionadas con esos ingredientes
+        const comidasPorIngredientes = comidaIngreData
+          .filter(rel => ingredienteIds.includes(rel.Id_Ingrediente))
+          .map(rel => rel.Id_Comida);
+
+        // Combinar las comidas encontradas por nombre de comida e ingredientes
+        const comidasPorNombreYIngredientes = comidaData.filter(comida =>
+          comidasPorIngredientes.includes(comida.Id_Comida) || comidasFiltradas.some(c => c.Id_Comida === comida.Id_Comida)
+        );
+
+        comidasFiltradas = [...new Set(comidasPorNombreYIngredientes)];
+      }
+    }
+
+    // Añadir los nombres de los ingredientes usados a cada comida
+    const comidasConIngredientes = comidasFiltradas.map(comida => {
+      const ingredientesDeLaComida = comidaIngreData
+        .filter(rel => rel.Id_Comida === comida.Id_Comida)
+        .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
+
+      return {
+        ...comida,
+        Ingredientes: ingredientesDeLaComida
+      };
+    });
+
+    // Responder con las comidas filtradas
+    res.json(comidasConIngredientes);
+  } catch (err) {
+    console.error('Error obteniendo las comidas:', err);
+    res.status(500).json({ error: "Error al procesar la solicitud." });
+  }
+});
+
 
 
   app.get('/usuarios', async (req, res) => {
@@ -146,6 +179,41 @@ app.get('/comidasxingredientes', async (req, res) => {
       res.status(500).json({ error: 'Error al cargar los datos' });
     }
   });
+
+  app.get('/buscar', async (req, res) => {
+    try {
+      const { query } = req.query; // Obtener término de búsqueda
+      if (!query) {
+        return res.status(400).json({ error: 'El parámetro de búsqueda es obligatorio.' });
+      }
+      
+      const menus = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+      const ingredientes = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+      const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+  
+      // Filtrar datos según el término
+      const resultadoMenus = menus.filter(menu => 
+        menu.Nombre.toLowerCase().includes(query.toLowerCase())
+      );
+      const resultadoIngredientes = ingredientes.filter(ing => 
+        ing.Nombre.toLowerCase().includes(query.toLowerCase())
+      );
+      const resultadoCafeterias = cafeterias.filter(caf => 
+        caf.Nombre.toLowerCase().includes(query.toLowerCase())
+      );
+  
+      res.json({
+        menus: resultadoMenus,
+        ingredientes: resultadoIngredientes,
+        cafeterias: resultadoCafeterias,
+      });
+    } catch (err) {
+      console.error('Error procesando búsqueda:', err);
+      res.status(500).json({ error: 'Error al realizar la búsqueda.' });
+    }
+  });
+  
+  
   
 
 // Iniciar el servidor
