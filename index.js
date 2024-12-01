@@ -212,6 +212,89 @@ app.get('/comidasxingredientes', async (req, res) => {
       res.status(500).json({ error: 'Error al realizar la búsqueda.' });
     }
   });
+
+  // Endpoint para buscar comida por nombre
+app.get('/buscar-comida', async (req, res) => {
+  try {
+    const { nombre } = req.query; // Obtener el nombre de la comida
+    if (!nombre) {
+      return res.status(400).json({ error: 'El parámetro "nombre" es obligatorio.' });
+    }
+
+    // Leer los archivos necesarios
+    const comidaData = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+    const ingredientesData = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+    const comidaIngreData = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
+
+    // Filtrar comidas por nombre
+    const comidasEncontradas = comidaData.filter(comida =>
+      comida.Nombre.toLowerCase().includes(nombre.toLowerCase())
+    );
+
+    // Añadir ingredientes a cada comida encontrada
+    const comidasConIngredientes = comidasEncontradas.map(comida => {
+      const ingredientesDeLaComida = comidaIngreData
+        .filter(rel => rel.Id_Comida === comida.Id_Comida)
+        .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
+
+      return {
+        ...comida,
+        Ingredientes: ingredientesDeLaComida,
+      };
+    });
+
+    res.json(comidasConIngredientes);
+  } catch (err) {
+    console.error('Error al buscar comida:', err);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+});
+
+// Endpoint para buscar cafetería por nombre
+app.get('/buscar-cafeteria', async (req, res) => {
+  try {
+    const { nombre } = req.query; // Obtener el nombre de la cafetería
+    if (!nombre) {
+      return res.status(400).json({ error: 'El parámetro "nombre" es obligatorio.' });
+    }
+
+    // Leer los archivos necesarios
+    const cafeteriasData = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const sucursalesData = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const cafeteriaSucData = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+    // Filtrar cafeterías por nombre
+    const cafeteriasEncontradas = cafeteriasData.filter(cafeteria =>
+      cafeteria.Nombre.toLowerCase().includes(nombre.toLowerCase())
+    );
+
+    // Añadir sucursales a cada cafetería encontrada
+    const cafeteriasConSucursales = cafeteriasEncontradas.map(cafeteria => {
+      const sucursalesAsociadas = cafeteriaSucData
+        .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
+        .map(rel => {
+          const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+          return {
+            Id_Sucursal: rel.Id_Sucursal,
+            Nombre: sucursal ? sucursal.Nombre : null,
+            Horario: rel.Horario,
+            Numero_Local: rel.Numero_Local,
+          };
+        });
+
+      return {
+        ...cafeteria,
+        Sucursales: sucursalesAsociadas,
+      };
+    });
+
+    res.json(cafeteriasConSucursales);
+  } catch (err) {
+    console.error('Error al buscar cafetería:', err);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+});
+
   
   
   
