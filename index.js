@@ -180,38 +180,86 @@ app.get('/comidasxingredientes', async (req, res) => {
     }
   });
 
-  app.get('/buscar', async (req, res) => {
-    try {
-      const { query } = req.query; // Obtener término de búsqueda
-      if (!query) {
-        return res.status(400).json({ error: 'El parámetro de búsqueda es obligatorio.' });
-      }
-      
-      const menus = await readJsonFile(path.join(nfsPath, 'TComida.json'));
-      const ingredientes = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
-      const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
-  
-      // Filtrar datos según el término
-      const resultadoMenus = menus.filter(menu => 
-        menu.Nombre.toLowerCase().includes(query.toLowerCase())
-      );
-      const resultadoIngredientes = ingredientes.filter(ing => 
-        ing.Nombre.toLowerCase().includes(query.toLowerCase())
-      );
-      const resultadoCafeterias = cafeterias.filter(caf => 
-        caf.Nombre.toLowerCase().includes(query.toLowerCase())
-      );
-  
-      res.json({
-        menus: resultadoMenus,
-        ingredientes: resultadoIngredientes,
-        cafeterias: resultadoCafeterias,
-      });
-    } catch (err) {
-      console.error('Error procesando búsqueda:', err);
-      res.status(500).json({ error: 'Error al realizar la búsqueda.' });
+  //Esta libreria permite hacer filtrasiones mucho mas serteras sin necesidad de tener que completar bien la palabra esta muy chida
+  const Fuse = require('fuse.js');
+
+app.get('/buscar', async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: 'El parámetro de búsqueda es obligatorio.' });
     }
-  });
+
+    const queryLower = query.toLowerCase();
+
+    // Leer archivos necesarios
+    const menus = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+    const ingredientes = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+    const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const comidaIngre = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
+
+    // Búsqueda en menús
+    const resultadoMenus = menus.filter(menu =>
+      menu.Nombre.toLowerCase().includes(queryLower)
+    );
+
+    // Búsqueda en ingredientes
+    const ingredientesCoincidentes = ingredientes.filter(ing =>
+      ing.Nombre.toLowerCase().includes(queryLower)
+    );
+
+    // Obtener comidas asociadas con ingredientes coincidentes y sus datos
+    const comidasPorIngredientes = comidaIngre
+      .filter(rel => ingredientesCoincidentes.some(ing => ing.Id_Ingrediente === rel.Id_Ingrediente))
+      .map(rel => {
+        const comida = menus.find(menu => menu.Id_Comida === rel.Id_Comida);
+        if (comida) {
+          return {
+            ...comida,
+            Ingredientes: comidaIngre
+              .filter(cRel => cRel.Id_Comida === comida.Id_Comida)
+              .map(cRel => ingredientes.find(ing => ing.Id_Ingrediente === cRel.Id_Ingrediente)?.Nombre),
+            Cafeteria: cafeterias.find(caf => caf.Id_Cafeteria === comida.Id_Cafeteria)?.Nombre,
+          };
+        }
+      })
+      .filter(Boolean);
+
+    // Combinar menús encontrados por nombre e ingredientes
+    const resultadoComidas = [...new Set([...resultadoMenus, ...comidasPorIngredientes])];
+
+    // Búsqueda en cafeterías con todos sus datos
+    const resultadoCafeterias = cafeterias
+      .filter(caf => caf.Nombre.toLowerCase().includes(queryLower))
+      .map(caf => ({
+        Nombre: caf.Nombre,
+        Sucursal: caf.Sucursal,
+        Horario: caf.Horario,
+        NumeroLocal: caf.NumeroLocal,
+        Ubicacion: caf.Sucursal, // Ejemplo, podrías personalizar más datos aquí.
+      }));
+
+    // Usar Fuse.js si quieres mejorar la búsqueda difusa
+    const fuseMenus = new Fuse(menus, { keys: ['Nombre'], threshold: 0.4 });
+    const fuseCafeterias = new Fuse(cafeterias, { keys: ['Nombre'], threshold: 0.4 });
+
+    const fuzzyMenus = fuseMenus.search(query).map(result => result.item);
+    const fuzzyCafeterias = fuseCafeterias.search(query).map(result => result.item);
+
+    res.json({
+      comidas: resultadoComidas,
+      cafeterias: resultadoCafeterias,
+      fuzzyMenus,
+      fuzzyCafeterias,
+    });
+  } catch (err) {
+    console.error('Error procesando búsqueda:', err);
+    res.status(500).json({ error: 'Error al realizar la búsqueda.' });
+  }
+});
+
+
+  
 
   // Endpoint para buscar comida por nombre
 app.get('/buscar-comida', async (req, res) => {
