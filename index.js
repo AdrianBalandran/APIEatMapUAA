@@ -12,6 +12,16 @@ const nfsPath = path.join(__dirname, 'prueba_nfs');
 const cors = require('cors');
 app.use(cors());
 
+bodyParser = require('body-parser');
+
+// support parsing of application/json type post data
+app.use(bodyParser.json());
+
+//support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+
 // Función para leer un archivo JSON
 async function readJsonFile(filePath) {
   try {
@@ -293,6 +303,22 @@ app.get('/buscar-cafeteria', async (req, res) => {
     console.error('Error al buscar cafetería:', err);
     res.status(500).json({ error: 'Error al procesar la solicitud.' });
   }
+});
+
+// Endpoint para buscar cafetería por nombre
+app.post('/usuario/nuevo', async (req, res) => {
+  var data = req.body;
+  const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+  usuarios.push(data); 
+
+  const jsonString = JSON.stringify(usuarios); 
+  fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString, err => {
+    if (err) {
+        console.log('Error writing file', err)
+    } else {
+        console.log('Successfully wrote file')
+    }
+})
 });
 
   
