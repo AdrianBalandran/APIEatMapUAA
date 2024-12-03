@@ -3,7 +3,9 @@ const fs = require('fs').promises; // Usamos las funciones de promesas del módu
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+app.use(express.json()); //Middleware para parsear JSON
+app.use(express.urlencoded({ extended: true })); // Middleware para parsear datos de formularios URL-encoded (opcional, pero útil)
 
 // Ruta al directorio NFS
 //const nfsPath = '\\\\192.168.100.25\\data\\menus';
@@ -131,16 +133,64 @@ app.get('/comidasxingredientes', async (req, res) => {
     }
   });
 
-
-  app.get('/usuarios', async (req, res) => {
+  /*
+  app.route('/usuarios').get(async (req, res) => {
     try {
-      // Leer el archivo
+      //Leer el archivo
       const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-      
       res.json(usuarios);
-    } catch (err) {
-      console.error('Error al procesar los datos:', err);
+    } 
+    catch (err) {
+      console.error('Error al procesar los datos: ', err);
       res.status(500).json({ error: 'Error al cargar los datos' });
+    }
+  });
+  */
+  app.route('/login').post(async (req, res) => {
+    try {
+      const { Correo, Contrasena } = req.body; //Correo y contraseña del cuerpo de la solicitud
+
+      if(!Correo || !Contrasena) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Ingrese correo y contraseña.' 
+        });
+      }
+  
+      //Leer el archivo de usuarios
+      const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+  
+      //Buscar Correo y Contraseña
+      const usuario = usuarios.find(
+        usuario => usuario.Correo === Correo && usuario.Contrasena === Contrasena
+      );
+
+      if(usuario) {
+        return res.json({ 
+          success: true, 
+          message: 'Inicio de sesión exitoso',
+          usuario: {
+            Id_Usuario: usuario.Id_Usuario,
+            Nombre: usuario.Nombre,
+            Primer_Apellido: usuario.Primer_Apellido,
+            Segundo_Apellido: usuario.Segundo_Apellido,
+            Telefono: usuario.Telefono,
+            Tipo: usuario.Tipo
+          }
+        });
+      }
+
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Correo o contraseña incorrectos' 
+      });
+    } 
+    catch (err) {
+      console.error('Error en el inicio de sesión: ' . err);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error interno del servidor' 
+      });
     }
   });
   
