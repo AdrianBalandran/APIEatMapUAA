@@ -28,5 +28,15 @@
   "Telefono": "449123459876",
   "Correo": "al904457@edu.uaa.mx",
   "Tipo": "Cliente"
+},
+{
+  "Id_Usuario": 3,
+  "Nombre": "Adrian",
+  "Primer_Apellido": "Balandran",
+  "Segundo_Apellido": "Guerrero",
+  "Contrasena": "1209Balandran",
+  "Telefono": "449123459876",
+  "Email": "al904457@edu.uaa.mx",
+  "Tipo": "Cliente"
 }
 ]
