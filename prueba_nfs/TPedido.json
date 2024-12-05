@@ -1,0 +1,22 @@
+[
+ {
+    "Id_Usuario": 5,
+    "Id_Cafeteria": 1,
+    "Id_Sucursal": 1,
+    "Orden": 1,
+    "Pagado": "N",
+    "Tiempo": 30,
+    "Tipo_pago": "T",
+    "Fecha": "2024/12/04"
+ },
+ {
+    "Id_Usuario": 5,
+    "Id_Cafeteria": 1,
+    "Id_Sucursal": 1,
+    "Orden": 2,
+    "Pagado": "N",
+    "Tiempo": 30,
+    "Tipo_pago": "T",
+    "Fecha": "2024/12/04"
+ }
+]

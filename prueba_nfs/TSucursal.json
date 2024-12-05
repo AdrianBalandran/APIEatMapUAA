@@ -1,14 +1,27 @@
 [
  {
   "Id_Sucursal": 1,
-  "Nombre": "Sucursal Norte"
+  "Nombre": "Cafetería Oriente",
+  "Edificio": 47
 },
  {
   "Id_Sucursal": 2,
-  "Nombre": "Sucursal Sur"
+  "Nombre": "Cafeterí Sur",
+  "Edificio": 210
 },
  {
   "Id_Sucursal": 3,
-  "Nombre": "Sucursal Central"
+  "Nombre": "Comedor Universitario",
+  "Edificio": 9
+},
+{
+  "Id_Sucursal": 4,
+  "Nombre": "Cafetería de Ciencias de la Salud",
+  "Edificio": 104
+},
+{
+  "Id_Sucursal": 5,
+  "Nombre": "Cafetería Norte",
+  "Edificio": 122
 }
 ]

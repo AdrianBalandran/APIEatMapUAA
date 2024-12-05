@@ -280,6 +280,7 @@ app.get('/buscar-cafeteria', async (req, res) => {
 
     // Añadir sucursales a cada cafetería encontrada
     const cafeteriasConSucursales = cafeteriasEncontradas.map(cafeteria => {
+
       const sucursalesAsociadas = cafeteriaSucData
         .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
         .map(rel => {
@@ -321,9 +322,50 @@ app.post('/usuario/nuevo', async (req, res) => {
 })
 });
 
+
+// Endpoint para listar cafeterías con sus sucursales
+app.post('/pedidos', async (req, res) => {
+  try {
+    var data = req.body;
+    console.log(data);
+
+    // // Leer los archivos
+    const pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
+    const cafeteria = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const sucursal = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const OrdenComida = await readJsonFile(path.join(nfsPath, 'TOrden_Comida.json'));
+    const Comida = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+
+    // Filtrar pedidos del usuario
+    // const pedido = pedidos.find(ped => ped.Id_Usuario == data.Id_Usuario);
+
+    // // Añadir sucursales a cada cafetería encontrada
+    const PedidosUsuario = pedidos.map(pedido => {
+        pedido => rel.Id_Usuario == data.Id_Usuario
+          const cafeteriaNom = cafeteria.find(caf => caf.Id_Cafeteria == pedido.Id_Cafeteria).Nombre;
+          const sucursalNom = sucursal.find(suc => suc.Id_Sucursal == pedido.Id_Sucursal).Nombre;
+          const Id_Comida = OrdenComida.find(orden => orden.Id_Orden == pedido.Orden).Id_Comida;
+          const ComidaN = Comida.find(comida => comida.Id_Comida == Id_Comida).Nombre;
+          const Precio = Comida.find(comida => comida.Id_Comida == Id_Comida).Precio;
+        return {
+          Cafeteria: cafeteriaNom,
+          Sucursal: sucursalNom,
+          Comida: ComidaN,
+          Precio: Precio,
+          ...pedido,
+        };
+    });
+    console.log(PedidosUsuario);
+    // Enviar respuesta
+    res.json(PedidosUsuario);
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});
+
   
-  
-  
+
 
 // Iniciar el servidor
 app.listen(PORT, () => {
