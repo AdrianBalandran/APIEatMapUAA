@@ -73,10 +73,9 @@ app.get('/cafeterias', async (req, res) => {
           .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
           .map(rel => {
             const sucursal = sucursales.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-            return {
-              Id_Cafeteria: rel.Id_Cafeteria, 
+            return { 
               Id_Sucursal: rel.Id_Sucursal,
-              //Nombre: sucursal ? sucursal.Nombre : null,
+              Nombre: sucursal ? sucursal.Nombre : null,
               Horario: rel.Horario,
               Numero_Local: rel.Numero_Local,
               Edificio: rel.Edificio
