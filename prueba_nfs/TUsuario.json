@@ -1,1 +1,51 @@
-[{"Id_Usuario":1,"Nombre":"Gustavo","Primer_Apellido":"Avendaño","Segundo_Apellido":"Guevara","Contrasena":"123","Telefono":"449123456789","Email":"al250884@edu.uaa.mx","Tipo":"Admin"},{"Id_Usuario":2,"Nombre":"Juan","Primer_Apellido":"Perez","Segundo_Apellido":"González","Contrasena":"456","Telefono":"449987654321","Email":"al295778@edu.uaa.mx","Tipo":"Encargado"},{"Id_Usuario":3,"Nombre":"Jaime","Primer_Apellido":"Trujillo","Segundo_Apellido":"Dominguez","Contrasena":"789","Telefono":"449123459876","Email":"al904457@edu.uaa.mx","Tipo":"Cliente"},{"Id_Usuario":4,"Nombre":"Adrian","Primer_Apellido":"Balandran","Segundo_Apellido":"Guerrero","Contrasena":"1209Balandran","Telefono":"449123459876","Email":"al904457@edu.uaa.mx","Tipo":"Cliente"},{"Contrasena":"123","Email":"dianafp3009@gmail.com","Id_Usuario":"5","Nombre":"Diana","Primer_Apellido":"Flores","Segundo_Apellido":"Prieto","Telefono":"346113234","Tipo":"Cliente"}]
+[
+{
+  "Id_Usuario": 1,
+  "Nombre": "Gustavo",
+  "Primer_Apellido": "Avendaño",
+  "Segundo_Apellido": "Guevara",
+  "Contrasena": "123",
+  "Telefono": "449123456789",
+  "Correo": "al250884@edu.uaa.mx",
+  "Tipo": "Admin"
+},
+{
+  "Id_Usuario": 2,
+  "Nombre": "Juan",
+  "Primer_Apellido": "Perez",
+  "Segundo_Apellido": "González",
+  "Contrasena": "456",
+  "Telefono": "449987654321",
+  "Correo": "al295778@edu.uaa.mx",
+  "Tipo": "Encargado"
+},
+{
+  "Id_Usuario": 3,
+  "Nombre": "Jaime",
+  "Primer_Apellido": "Trujillo",
+  "Segundo_Apellido": "Dominguez",
+  "Contrasena": "789",
+  "Telefono": "449123459876",
+  "Correo": "al904457@edu.uaa.mx",
+  "Tipo": "Cliente"
+},
+{
+  "Id_Usuario": 4,
+  "Nombre": "Adrian",
+  "Primer_Apellido": "Balandran",
+  "Segundo_Apellido": "Guerrero",
+  "Contrasena": "1209Balandran",
+  "Telefono": "449123459876",
+  "Email": "al904457@edu.uaa.mx",
+  "Tipo": "Cliente"
+},
+{
+  "Id_Usuario":"5",
+  "Nombre":"Diana",
+  "Primer_Apellido":"Flores",
+  "Segundo_Apellido":"Prieto",
+  "Contrasena":"123",
+  "Telefono":"346113234",
+  "Email":"dianafp3009@gmail.com",
+  "Tipo":"Cliente"}
+]

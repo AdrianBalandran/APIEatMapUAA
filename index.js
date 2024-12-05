@@ -3,7 +3,9 @@ const fs = require('fs').promises; // Usamos las funciones de promesas del módu
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+app.use(express.json()); //Middleware para parsear JSON
+app.use(express.urlencoded({ extended: true })); // Middleware para parsear datos de formularios URL-encoded (opcional, pero útil)
 
 // Ruta al directorio NFS
 //const nfsPath = '\\\\192.168.100.25\\data\\menus';
@@ -71,11 +73,12 @@ app.get('/cafeterias', async (req, res) => {
           .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
           .map(rel => {
             const sucursal = sucursales.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-            return {
+            return { 
               Id_Sucursal: rel.Id_Sucursal,
               Nombre: sucursal ? sucursal.Nombre : null,
               Horario: rel.Horario,
-              Numero_Local: rel.Numero_Local
+              Numero_Local: rel.Numero_Local,
+              Edificio: rel.Edificio
             };
           });
   
@@ -83,7 +86,7 @@ app.get('/cafeterias', async (req, res) => {
         return {
           Id_Cafeteria: cafeteria.Id_Cafeteria,
           Nombre: cafeteria.Nombre,
-          Edificio: cafeteria.Edificio,
+          //Edificio: cafeteria.Edificio,
           Sucursales: sucursalesAsociadas
         };
       });
@@ -177,51 +180,157 @@ app.get('/comidasxingredientes', async (req, res) => {
 });
 
 
-
-  app.get('/usuarios', async (req, res) => {
+  
+  app.route('/usuarios').get(async (req, res) => {
     try {
-      // Leer el archivo
+      //Leer el archivo
       const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-      
       res.json(usuarios);
-    } catch (err) {
-      console.error('Error al procesar los datos:', err);
+    } 
+    catch (err) {
+      console.error('Error al procesar los datos: ', err);
       res.status(500).json({ error: 'Error al cargar los datos' });
     }
   });
 
-  app.get('/buscar', async (req, res) => {
+  //Login para la aplicación Android
+  app.route('/login').post(async (req, res) => {
     try {
-      const { query } = req.query; // Obtener término de búsqueda
-      if (!query) {
-        return res.status(400).json({ error: 'El parámetro de búsqueda es obligatorio.' });
+      const { Correo, Contrasena } = req.body; //Correo y contraseña del cuerpo de la solicitud
+
+      if(!Correo || !Contrasena) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Se requiere correo o contraseña.',
+          usuario: null 
+        });
+      }
+  
+      //Leer el archivo de usuarios
+      const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+  
+      //Buscar Correo y Contraseña
+      const usuario = usuarios.find(usuario => usuario.Correo === Correo);
+
+      if(!usuario) {
+        return res.status(404).json({
+          success: false,
+          message: 'El correo no está registrado.',
+          usuario: null 
+        });
       }
       
-      const menus = await readJsonFile(path.join(nfsPath, 'TComida.json'));
-      const ingredientes = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
-      const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
-  
-      // Filtrar datos según el término
-      const resultadoMenus = menus.filter(menu => 
-        menu.Nombre.toLowerCase().includes(query.toLowerCase())
-      );
-      const resultadoIngredientes = ingredientes.filter(ing => 
-        ing.Nombre.toLowerCase().includes(query.toLowerCase())
-      );
-      const resultadoCafeterias = cafeterias.filter(caf => 
-        caf.Nombre.toLowerCase().includes(query.toLowerCase())
-      );
-  
-      res.json({
-        menus: resultadoMenus,
-        ingredientes: resultadoIngredientes,
-        cafeterias: resultadoCafeterias,
+      if(usuario.Contrasena !== Contrasena) {
+        return res.status(401).json({
+          success: false,
+          message: 'La contraseña es incorrecta.',
+          usuario: null 
+        });
+      }
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Inicio de sesión correcto.',
+        usuario: {
+          Id_Usuario: usuario.Id_Usuario,
+          Nombre: usuario.Nombre,
+          Primer_Apellido: usuario.Primer_Apellido,
+          Segundo_Apellido: usuario.Segundo_Apellido,
+          Telefono: usuario.Telefono,
+          Tipo: usuario.Tipo
+        }
       });
-    } catch (err) {
-      console.error('Error procesando búsqueda:', err);
-      res.status(500).json({ error: 'Error al realizar la búsqueda.' });
+
+    } 
+    catch(err) {
+      console.error('Error en el inicio de sesión: ' + err);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error interno del servidor' 
+      });
     }
   });
+
+  //Esta libreria permite hacer filtrasiones mucho mas serteras sin necesidad de tener que completar bien la palabra esta muy chida
+  const Fuse = require('fuse.js');
+
+app.get('/buscar', async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: 'El parámetro de búsqueda es obligatorio.' });
+    }
+
+    const queryLower = query.toLowerCase();
+
+    // Leer archivos necesarios
+    const menus = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+    const ingredientes = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+    const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const comidaIngre = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
+
+    // Búsqueda en menús
+    const resultadoMenus = menus.filter(menu =>
+      menu.Nombre.toLowerCase().includes(queryLower)
+    );
+
+    // Búsqueda en ingredientes
+    const ingredientesCoincidentes = ingredientes.filter(ing =>
+      ing.Nombre.toLowerCase().includes(queryLower)
+    );
+
+    // Obtener comidas asociadas con ingredientes coincidentes y sus datos
+    const comidasPorIngredientes = comidaIngre
+      .filter(rel => ingredientesCoincidentes.some(ing => ing.Id_Ingrediente === rel.Id_Ingrediente))
+      .map(rel => {
+        const comida = menus.find(menu => menu.Id_Comida === rel.Id_Comida);
+        if (comida) {
+          return {
+            ...comida,
+            Ingredientes: comidaIngre
+              .filter(cRel => cRel.Id_Comida === comida.Id_Comida)
+              .map(cRel => ingredientes.find(ing => ing.Id_Ingrediente === cRel.Id_Ingrediente)?.Nombre),
+            Cafeteria: cafeterias.find(caf => caf.Id_Cafeteria === comida.Id_Cafeteria)?.Nombre,
+          };
+        }
+      })
+      .filter(Boolean);
+
+    // Combinar menús encontrados por nombre e ingredientes
+    const resultadoComidas = [...new Set([...resultadoMenus, ...comidasPorIngredientes])];
+
+    // Búsqueda en cafeterías con todos sus datos
+    const resultadoCafeterias = cafeterias
+      .filter(caf => caf.Nombre.toLowerCase().includes(queryLower))
+      .map(caf => ({
+        Nombre: caf.Nombre,
+        Sucursal: caf.Sucursal,
+        Horario: caf.Horario,
+        NumeroLocal: caf.NumeroLocal,
+        Ubicacion: caf.Sucursal, // Ejemplo, podrías personalizar más datos aquí.
+      }));
+
+    // Usar Fuse.js si quieres mejorar la búsqueda difusa
+    const fuseMenus = new Fuse(menus, { keys: ['Nombre'], threshold: 0.4 });
+    const fuseCafeterias = new Fuse(cafeterias, { keys: ['Nombre'], threshold: 0.4 });
+
+    const fuzzyMenus = fuseMenus.search(query).map(result => result.item);
+    const fuzzyCafeterias = fuseCafeterias.search(query).map(result => result.item);
+
+    res.json({
+      comidas: resultadoComidas,
+      cafeterias: resultadoCafeterias,
+      fuzzyMenus,
+      fuzzyCafeterias,
+    });
+  } catch (err) {
+    console.error('Error procesando búsqueda:', err);
+    res.status(500).json({ error: 'Error al realizar la búsqueda.' });
+  }
+});
+
+
+  
 
   // Endpoint para buscar comida por nombre
 app.get('/buscar-comida', async (req, res) => {
@@ -363,9 +472,6 @@ app.post('/pedidos', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
   }
 });
-
-  
-
 
 // Iniciar el servidor
 app.listen(PORT, () => {
