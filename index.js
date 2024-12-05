@@ -179,7 +179,7 @@ app.get('/comidasxingredientes', async (req, res) => {
 });
 
 
-  /*
+  
   app.route('/usuarios').get(async (req, res) => {
     try {
       //Leer el archivo
@@ -192,7 +192,7 @@ app.get('/comidasxingredientes', async (req, res) => {
     }
   });
 
-  */
+  //Login para la aplicación Android
   app.route('/login').post(async (req, res) => {
     try {
       const { Correo, Contrasena } = req.body; //Correo y contraseña del cuerpo de la solicitud
@@ -208,32 +208,38 @@ app.get('/comidasxingredientes', async (req, res) => {
       const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
   
       //Buscar Correo y Contraseña
-      const usuario = usuarios.find(
-        usuario => usuario.Correo === Correo && usuario.Contrasena === Contrasena
-      );
+      const usuario = usuarios.find(usuario => usuario.Correo === Correo);
 
-      if(usuario) {
-        return res.json({ 
-          success: true, 
-          message: 'Inicio de sesión exitoso',
-          usuario: {
-            Id_Usuario: usuario.Id_Usuario,
-            Nombre: usuario.Nombre,
-            Primer_Apellido: usuario.Primer_Apellido,
-            Segundo_Apellido: usuario.Segundo_Apellido,
-            Telefono: usuario.Telefono,
-            Tipo: usuario.Tipo
-          }
+      if(!usuario) {
+        return res.status(404).json({
+          success: false,
+          message: 'El correo no está registrado.'
         });
       }
-
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Correo o contraseña incorrectos' 
+      
+      if(usuario.Contrasena !== Contrasena) {
+        return res.status(401).json({
+          success: false,
+          message: 'Contraseña incorrecta.'
+        });
+      }
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Inicio de sesión exitoso',
+        usuario: {
+          Id_Usuario: usuario.Id_Usuario,
+          Nombre: usuario.Nombre,
+          Primer_Apellido: usuario.Primer_Apellido,
+          Segundo_Apellido: usuario.Segundo_Apellido,
+          Telefono: usuario.Telefono,
+          Tipo: usuario.Tipo
+        }
       });
+
     } 
-    catch (err) {
-      console.error('Error en el inicio de sesión: ' . err);
+    catch(err) {
+      console.error('Error en el inicio de sesión: ' + err);
       res.status(500).json({ 
         success: false, 
         message: 'Error interno del servidor' 
@@ -419,10 +425,6 @@ app.post('/usuario/nuevo', async (req, res) => {
     }
 })
 });
-
-  
-
-  
 
 // Iniciar el servidor
 app.listen(PORT, () => {
