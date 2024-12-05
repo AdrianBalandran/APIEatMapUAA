@@ -74,10 +74,12 @@ app.get('/cafeterias', async (req, res) => {
           .map(rel => {
             const sucursal = sucursales.find(s => s.Id_Sucursal === rel.Id_Sucursal);
             return {
+              Id_Cafeteria: rel.Id_Cafeteria, 
               Id_Sucursal: rel.Id_Sucursal,
-              Nombre: sucursal ? sucursal.Nombre : null,
+              //Nombre: sucursal ? sucursal.Nombre : null,
               Horario: rel.Horario,
-              Numero_Local: rel.Numero_Local
+              Numero_Local: rel.Numero_Local,
+              Edificio: rel.Edificio
             };
           });
   
@@ -85,7 +87,7 @@ app.get('/cafeterias', async (req, res) => {
         return {
           Id_Cafeteria: cafeteria.Id_Cafeteria,
           Nombre: cafeteria.Nombre,
-          Edificio: cafeteria.Edificio,
+          //Edificio: cafeteria.Edificio,
           Sucursales: sucursalesAsociadas
         };
       });
