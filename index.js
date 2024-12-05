@@ -200,7 +200,8 @@ app.get('/comidasxingredientes', async (req, res) => {
       if(!Correo || !Contrasena) {
         return res.status(400).json({ 
           success: false, 
-          message: 'Ingrese correo y contraseña.' 
+          message: 'Se requiere correo o contraseña.',
+          usuario: null 
         });
       }
   
@@ -213,20 +214,22 @@ app.get('/comidasxingredientes', async (req, res) => {
       if(!usuario) {
         return res.status(404).json({
           success: false,
-          message: 'El correo no está registrado.'
+          message: 'El correo no está registrado.',
+          usuario: null 
         });
       }
       
       if(usuario.Contrasena !== Contrasena) {
         return res.status(401).json({
           success: false,
-          message: 'Contraseña incorrecta.'
+          message: 'La contraseña es incorrecta.',
+          usuario: null 
         });
       }
       
       return res.status(200).json({ 
         success: true, 
-        message: 'Inicio de sesión exitoso',
+        message: 'Inicio de sesión correcto.',
         usuario: {
           Id_Usuario: usuario.Id_Usuario,
           Nombre: usuario.Nombre,
