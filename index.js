@@ -44,6 +44,8 @@ app.get('/menus', async (req, res) => {
 
     // Combinar los datos usando las llaves foráneas
     const menusConSucursal = menus.map(menu => {
+      // Podría haber errores cafetería_suc
+      // Equipo
       const sucursal = sucursales.find(suc => suc.Id_Cafeteria === menu.Cafeteria_Sucursal);
       return {
         ...menu,
@@ -69,6 +71,8 @@ app.get('/cafeterias', async (req, res) => {
       // Combinar datos
       const resultado = cafeterias.map(cafeteria => {
         // Encontrar las sucursales asociadas a esta cafetería
+        // Podría haber errores edificio
+        // Equipo
         const sucursalesAsociadas = cafeteriaSucursales
           .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
           .map(rel => {
