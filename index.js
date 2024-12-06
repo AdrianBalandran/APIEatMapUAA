@@ -473,6 +473,59 @@ app.post('/pedidos', async (req, res) => {
   }
 });
 
+app.post('/usuario/get', async (req, res) => {
+  try {
+    // Leer el archivo
+    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    var data = req.body;
+    for(usu of usuarios){
+      if(usu.Email == data.Email){
+        res.json(usu);
+      } 
+    }
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});
+
+app.post('/usuario/getsuyca', async (req, res) => {
+  try {
+    let id = ""; 
+    // Leer el archivo
+    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const encargado = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+    const cafeteria =  await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const sucursal =  await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+
+    var data = req.body;
+    for(usu of usuarios){
+      if(usu.Email == data.Email){
+        id = usu.Id_Usuario;
+      } 
+    }
+
+    const enca = encargado.filter(ing =>
+      ing.Id_Usuario === id);
+     
+    const sucursalNombre = sucursal.filter(ing =>
+      ing.Id_Sucursal === enca[0].Id_Cafeteria);
+
+    const cafeNombre = cafeteria.filter(ing =>
+      ing.Id_Cafeteria === enca[0].Id_Cafeteria);
+  
+    res.json({
+      NombreCafe: cafeNombre[0].Nombre,
+      NombreSucu: sucursalNombre[0].Nombre
+    });
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});
+  
+  
 // Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
