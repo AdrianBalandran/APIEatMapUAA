@@ -81,7 +81,7 @@ app.get('/cafeterias', async (req, res) => {
               Nombre: sucursal ? sucursal.Nombre : null,
               Horario: rel.Horario,
               Numero_Local: rel.Numero_Local,
-              Edificio: rel.Edificio
+              Edificio: sucursal.Edificio
             };
           });
   
@@ -89,7 +89,6 @@ app.get('/cafeterias', async (req, res) => {
         return {
           Id_Cafeteria: cafeteria.Id_Cafeteria,
           Nombre: cafeteria.Nombre,
-          //Edificio: cafeteria.Edificio,
           Sucursales: sucursalesAsociadas
         };
       });
