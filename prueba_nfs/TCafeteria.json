@@ -2,5 +2,33 @@
  {
   "Id_Cafeteria": 1,
   "Nombre": "La Gula"
+},
+{
+  "Id_Cafeteria": 2,
+  "Nombre": "Cafe Original de la taza"
+},
+{
+  "Id_Cafeteria":3,
+  "Nombre": "Las Exquisitas"
+},
+{
+  "Id_Cafeteria":4,
+  "Nombre": "El Alamo"
+},
+{
+  "Id_Cafeteria": 5,
+  "Nombre": "Yosakura"
+},
+{
+  "Id_Cafeteria": 6,
+  "Nombre": "Finca Santa Veracruz"
+},
+{
+  "Id_Cafeteria": 7,
+  "Nombre": "Gamebar"
+},
+{
+  "Id_Cafeteria": 8,
+  "Nombre": "Fiesta Mexicana"
 }
 ]
