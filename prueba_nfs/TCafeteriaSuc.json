@@ -6,9 +6,51 @@
   "Numero_Local": 1
 },
  {
+  "Id_Cafeteria": 2,
+  "Id_Sucursal": 1,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 2
+},
+{
+  "Id_Cafeteria": 3,
+  "Id_Sucursal": 1,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 3
+},
+{
+  "Id_Cafeteria": 4,
+  "Id_Sucursal": 1,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 4
+},
+{
   "Id_Cafeteria": 1,
   "Id_Sucursal": 3,
   "Horario": "8 a.m - 6 p.m",
-  "Numero_Local": 10
+  "Numero_Local": 1
+},
+{
+  "Id_Cafeteria": 5,
+  "Id_Sucursal": 3,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 2
+},
+{
+  "Id_Cafeteria": 6,
+  "Id_Sucursal": 3,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 3
+},
+{
+  "Id_Cafeteria": 7,
+  "Id_Sucursal": 3,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 4
+},
+{
+  "Id_Cafeteria": 8,
+  "Id_Sucursal": 3,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 5
 }
 ]
