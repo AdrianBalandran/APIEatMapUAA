@@ -762,9 +762,6 @@ app.get('/buscar', async (req, res) => {
   }
 });
 
-<<<<<<< Updated upstream
-=======
-
 //Mostrar todo el contenido
 app.get('/filtrar', async (req, res) => {
   try {
@@ -862,15 +859,6 @@ app.get('/filtrar', async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la solicitud.' });
   }
 });
-
-
-
-
-
-
-
-  
->>>>>>> Stashed changes
   
 // Iniciar el servidor
 app.listen(PORT, () => {
