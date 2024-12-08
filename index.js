@@ -212,7 +212,7 @@ app.get('/comidasxingredientes', async (req, res) => {
       const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
   
       //Buscar Correo y Contraseña
-      const usuario = usuarios.find(usuario => usuario.Correo === Correo);
+      const usuario = usuarios.find(usuario => usuario.Email === Correo);
 
       if(!usuario) {
         return res.status(404).json({
@@ -370,9 +370,12 @@ app.post('/pedidos', async (req, res) => {
     // Filtrar pedidos del usuario
     // const pedido = pedidos.find(ped => ped.Id_Usuario == data.Id_Usuario);
 
-    // // Añadir sucursales a cada cafetería encontrada
-    const PedidosUsuario = pedidos.map(pedido => {
-        pedido => rel.Id_Usuario == data.Id_Usuario
+    // // Añadir pedido del usuario
+
+
+    const PedidosUsuario = pedidos
+    .filter(rel => rel.Id_Usuario === data.Id_Usuario)
+    .map(pedido => {
           const cafeteriaNom = cafeteria.find(caf => caf.Id_Cafeteria == pedido.Id_Cafeteria).Nombre;
           const sucursalNom = sucursal.find(suc => suc.Id_Sucursal == pedido.Id_Sucursal).Nombre;
           const Id_Comida = OrdenComida.find(orden => orden.Id_Orden == pedido.Orden).Id_Comida;
