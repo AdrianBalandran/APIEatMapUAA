@@ -528,6 +528,56 @@ app.post('/usuario/getsuyca', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
   }
 });
+
+app.post('/comidaid', async (req, res) => {
+  try {
+    // Leer el archivo
+    const comidas = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+    const cafeteria = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const cafeteriaSucursal = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+    const sucursal = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const ingredientes = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+    const comidaIngrediente = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
+
+    var data = req.body;
+
+    const comida = comidas.find(ing =>
+      ing.Id_Comida === Number(data.Id_Comida));
+    const nombreCaf = cafeteria.find(ing => 
+      ing.Id_Cafeteria === Number(comida.Id_Cafeteria)).Nombre;
+    const sucuInfo = sucursal.find(ing =>
+      ing.Id_Sucursal === Number(comida.Id_Sucursal));
+    const cafesucu = cafeteriaSucursal.find(ing =>
+      ing.Id_Sucursal === Number(comida.Id_Sucursal && ing.Id_Cafeteria === Number(comida.Id_Cafeteria)));
+
+    const relacion = comidaIngrediente.filter(ing =>
+      ing.Id_Comida === Number(data.Id_Comida));
+
+    let ingre = Array(relacion.length); 
+      for(let i=0; i<relacion.length; i++){
+      ingre[i] = ingredientes.find(ing =>
+        ing.Id_Ingrediente === relacion[i].Id_Ingrediente).Nombre;
+    }
+
+
+    res.json({
+      Comida: comida,
+      Ingredientes: ingre, 
+      NombreCafeteria: nombreCaf, 
+      NombreSucursal: sucuInfo.Nombre, 
+      SucursalEdificio: sucuInfo.Edificio, 
+      Local: cafesucu.Numero_Local, 
+      Horario: cafesucu.Horario
+    });
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});
+
+
+
   
   
 // Iniciar el servidor

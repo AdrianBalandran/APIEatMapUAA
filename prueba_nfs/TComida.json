@@ -34,7 +34,7 @@
  {
   "Id_Comida": 5,
   "Nombre":"Quesadillas",
-  "Precio":34.20,
+  "Precio":22.00,
   "Id_Cafeteria":1,
   "Id_Sucursal": 1,
   "TiempoPrepa":"12"
@@ -46,5 +46,21 @@
   "Id_Cafeteria":1,
   "Id_Sucursal": 1,
   "TiempoPrepa":"22"
+}, 
+{
+  "Id_Comida": 7,
+  "Nombre":"Enchiladas verdes",
+  "Precio":45.00,
+  "Id_Cafeteria":1,
+  "Id_Sucursal": 1,
+  "TiempoPrepa":"15"
+}, 
+{
+  "Id_Comida": 8,
+  "Nombre":"Molletes",
+  "Precio":18.00,
+  "Id_Cafeteria":1,
+  "Id_Sucursal": 1,
+  "TiempoPrepa":"10"
 }
 ]

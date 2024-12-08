@@ -18,5 +18,25 @@
  {
   "Id_Ingrediente": 5,
   "Nombre": "Huevos"
-}
+},
+{
+ "Id_Ingrediente": 6,
+ "Nombre": "Frijoles"
+},
+{
+ "Id_Ingrediente": 7,
+ "Nombre": "Salsa"
+},
+{
+ "Id_Ingrediente": 8,
+ "Nombre": "Crema"
+},
+{
+  "Id_Ingrediente": 9,
+  "Nombre": "Tortilla"
+ },
+ {
+   "Id_Ingrediente": 10,
+   "Nombre": "Bolillo"
+  }
 ]

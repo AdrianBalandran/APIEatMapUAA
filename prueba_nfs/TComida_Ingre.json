@@ -7,6 +7,18 @@
   "Id_Ingrediente": 4,
   "Id_Comida": 2
 },
+{
+  "Id_Ingrediente": 6,
+  "Id_Comida": 2
+},
+{
+  "Id_Ingrediente": 7,
+  "Id_Comida": 2
+},
+{
+  "Id_Ingrediente": 8,
+  "Id_Comida": 2
+},
  {
   "Id_Ingrediente": 1,
   "Id_Comida": 3
@@ -27,8 +39,40 @@
   "Id_Ingrediente": 5,
   "Id_Comida": 6
 },
+{
+  "Id_Ingrediente": 5,
+  "Id_Comida": 9
+},
  {
   "Id_Ingrediente": 4,
   "Id_Comida": 5
+},
+{
+ "Id_Ingrediente": 7,
+ "Id_Comida": 7
+},
+{
+ "Id_Ingrediente": 1,
+ "Id_Comida": 7
+},
+{
+ "Id_Ingrediente": 9,
+ "Id_Comida": 7
+},
+{
+ "Id_Ingrediente": 3,
+ "Id_Comida": 7
+},
+{
+ "Id_Ingrediente": 4,
+ "Id_Comida": 8
+},
+{
+ "Id_Ingrediente": 6,
+ "Id_Comida": 8
+},
+{
+ "Id_Ingrediente": 10,
+ "Id_Comida": 8
 }
 ]
