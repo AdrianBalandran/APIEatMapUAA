@@ -28,5 +28,15 @@
    "Tiempo": 30,
    "Tipo_pago": "T",
    "Fecha": "2024/12/04"
-}
+}, 
+{
+    "Id_Usuario": 4,
+    "Id_Cafeteria": 1,
+    "Id_Sucursal": 2,
+    "Orden": 4,
+    "Pagado": "N",
+    "Tiempo": 30,
+    "Tipo_pago": "T",
+    "Fecha": "2024/12/08"
+ }
 ]

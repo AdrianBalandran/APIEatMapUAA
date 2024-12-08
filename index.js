@@ -485,18 +485,20 @@ app.post('/usuario/getsuyca', async (req, res) => {
       } 
     }
 
-    const enca = encargado.filter(ing =>
+    const enca = encargado.find(ing =>
       ing.Id_Usuario === id);
      
-    const sucursalNombre = sucursal.filter(ing =>
-      ing.Id_Sucursal === enca[0].Id_Cafeteria);
+    const sucursalNombre = sucursal.find(ing =>
+      ing.Id_Sucursal === enca.Id_Cafeteria);
 
-    const cafeNombre = cafeteria.filter(ing =>
-      ing.Id_Cafeteria === enca[0].Id_Cafeteria);
+    const cafeNombre = cafeteria.find(ing =>
+      ing.Id_Cafeteria === enca.Id_Cafeteria);
   
     res.json({
-      NombreCafe: cafeNombre[0].Nombre,
-      NombreSucu: sucursalNombre[0].Nombre
+      NombreCafe: cafeNombre.Nombre,
+      Id_Cafeteria: cafeNombre.Id_Cafeteria,
+      NombreSucu: sucursalNombre.Nombre,
+      Id_Sucursal: sucursalNombre.Id_Sucursal
     });
 
   } catch (err) {
@@ -815,6 +817,103 @@ app.get('/buscar', async (req, res) => {
   }
 });
 
+//Mostrar todo el contenido
+app.get('/filtrar', async (req, res) => {
+  try {
+    const { tipo } = req.query;
+
+    if (!tipo) {
+      return res.status(400).json({ error: 'El parámetro "tipo" es obligatorio.' });
+    }
+
+    // Cargar los datos
+    const comidasData = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+    const ingredientesData = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
+    const comidaIngreData = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
+    const cafeteriasData = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const sucursalesData = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const cafeteriaSucData = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+    let resultados = [];
+
+    // Filtrar según el tipo
+    switch (tipo.toLowerCase()) {
+      case 'comida':
+        resultados = comidasData.map(comida => {
+          const ingredientesDeLaComida = comidaIngreData
+            .filter(rel => rel.Id_Comida === comida.Id_Comida)
+            .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
+
+          const sucursalesDisponibles = cafeteriaSucData
+            .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria && rel.Id_Sucursal === comida.Id_Sucursal)
+            .map(rel => {
+              const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+              const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
+              return {
+                Cafeteria: cafeteria?.Nombre || null,
+                Sucursal: sucursal?.Nombre || null,
+              };
+            });
+
+          return {
+            Nombre: comida.Nombre,
+            Precio: comida.Precio,
+            Ingredientes: ingredientesDeLaComida,
+            Disponibilidad: sucursalesDisponibles,
+            TiempoPrepa: comida.TiempoPrepa,
+          };
+        });
+        break;
+
+      case 'cafeteria':
+        resultados = cafeteriasData.map(cafeteria => {
+          const sucursalesDeCafeteria = cafeteriaSucData
+            .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
+            .map(rel => {
+              const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+              return {
+                NombreSucursal: sucursal?.Nombre || null,
+                Horario: rel.Horario,
+                NumeroLocal: rel.Numero_Local,
+                Edificio: sucursal?.Edificio || null,
+              };
+            });
+
+          return {
+            Nombre: cafeteria.Nombre,
+            Sucursales: sucursalesDeCafeteria,
+          };
+        });
+        break;
+
+      case 'ingrediente':
+        resultados = ingredientesData.map(ingrediente => {
+          const comidasConIngrediente = comidaIngreData
+            .filter(rel => rel.Id_Ingrediente === ingrediente.Id_Ingrediente)
+            .map(rel => comidasData.find(comida => comida.Id_Comida === rel.Id_Comida))
+            .filter(Boolean); // Elimina elementos nulos
+
+          return {
+            Nombre: ingrediente.Nombre,
+            UsadoEnComidas: comidasConIngrediente.map(comida => ({
+              Nombre: comida?.Nombre,
+              Precio: comida?.Precio,
+              TiempoPrepa: comida?.TiempoPrepa,
+            })),
+          };
+        });
+        break;
+
+      default:
+        return res.status(400).json({ error: 'El tipo no es válido. Usa "comida", "cafeteria" o "ingrediente".' });
+    }
+
+    res.json(resultados);
+  } catch (err) {
+    console.error('Error en el endpoint filtrar:', err);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+});
   
 // Iniciar el servidor
 app.listen(PORT, () => {
