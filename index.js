@@ -430,18 +430,20 @@ app.post('/usuario/getsuyca', async (req, res) => {
       } 
     }
 
-    const enca = encargado.filter(ing =>
+    const enca = encargado.find(ing =>
       ing.Id_Usuario === id);
      
-    const sucursalNombre = sucursal.filter(ing =>
-      ing.Id_Sucursal === enca[0].Id_Cafeteria);
+    const sucursalNombre = sucursal.find(ing =>
+      ing.Id_Sucursal === enca.Id_Cafeteria);
 
-    const cafeNombre = cafeteria.filter(ing =>
-      ing.Id_Cafeteria === enca[0].Id_Cafeteria);
+    const cafeNombre = cafeteria.find(ing =>
+      ing.Id_Cafeteria === enca.Id_Cafeteria);
   
     res.json({
-      NombreCafe: cafeNombre[0].Nombre,
-      NombreSucu: sucursalNombre[0].Nombre
+      NombreCafe: cafeNombre.Nombre,
+      Id_Cafeteria: cafeNombre.Id_Cafeteria,
+      NombreSucu: sucursalNombre.Nombre,
+      Id_Sucursal: sucursalNombre.Id_Sucursal
     });
 
   } catch (err) {
