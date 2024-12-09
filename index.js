@@ -354,7 +354,7 @@ app.post('/usuario/nuevo', async (req, res) => {
 });
 
 
-// Endpoint para listar cafeterías con sus sucursales
+// Endpoint para listar pedidos de cierto cliente
 app.post('/pedidos', async (req, res) => {
   try {
     var data = req.body;
@@ -397,6 +397,63 @@ app.post('/pedidos', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
   }
 });
+
+
+// Endpoint para listar pedidos del encargado
+app.post('/pedidos/getEnc', async (req, res) => {
+  try {
+    var data = req.body;
+    // console.log(data);
+
+    // // Leer los archivos
+    const UsuarioEncargado = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+    const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
+    const cafeteria = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const sucursal = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const OrdenComida = await readJsonFile(path.join(nfsPath, 'TOrden_Comida.json'));
+    const Comida = await readJsonFile(path.join(nfsPath, 'TComida.json'));
+
+    const usuarioTipo = Usuarios.find(usu => usu.Id_Usuario == data.Id_Usuario).Tipo;
+    if(!usuarioTipo) {
+      console.log(usuarioTipo);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'El usuario no es Encargado',
+        usuario: null 
+      });
+    }
+
+    // Cafeteria y Sucursal
+    const idCaySu = UsuarioEncargado.find(usu => usu.Id_Usuario == data.Id_Usuario);
+
+    const PedidosUsuarioEnc = pedidos
+    .filter(rel => rel.Id_Cafeteria === idCaySu.Id_Cafeteria && rel.Id_Sucursal === idCaySu.Id_Sucursal)
+    .map(pedido => {
+          const cafeteriaNom = cafeteria.find(caf => caf.Id_Cafeteria == pedido.Id_Cafeteria).Nombre;
+          const sucursalNom = sucursal.find(suc => suc.Id_Sucursal == pedido.Id_Sucursal).Nombre;
+          const Id_Comida = OrdenComida.find(orden => orden.Id_Orden == pedido.Orden).Id_Comida;
+          const ComidaN = Comida.find(comida => comida.Id_Comida == Id_Comida).Nombre;
+          const Precio = Comida.find(comida => comida.Id_Comida == Id_Comida).Precio;
+          const NombreUsu = Usuarios.find(usuario => usuario.Id_Usuario == pedido.Id_Usuario).Nombre;
+        return {
+          NombreUsuario: NombreUsu,
+          Cafeteria: cafeteriaNom,
+          Sucursal: sucursalNom,
+          Comida: ComidaN,
+          Precio: Precio,
+          ...pedido,
+        };
+    });
+
+    // Enviar respuesta
+    res.json(PedidosUsuarioEnc);
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});
+
 
 app.post('/usuario/get', async (req, res) => {
   try {
@@ -497,6 +554,33 @@ app.post('/comidaid', async (req, res) => {
     console.error('Error al procesar los datos:', err);
     res.status(500).json({ error: 'Error al cargar los datos' });
   }}); 
+
+
+  app.post('/pedido/entregado', async (req, res) => {
+    try {
+      // Leer el archivo
+      const Pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
+      var data = req.body;
+  
+      for(let pedido of Pedidos){
+        if(pedido.Orden == Number(data.Orden)){
+          pedido.Pagado = "S"; 
+        }
+      }
+
+      const jsonString = JSON.stringify(Pedidos); 
+      fs.writeFile(path.join(nfsPath, 'TPedido.json'), jsonString, err => {
+        if (err) {
+            console.log('Error writing file', err)
+        } else {
+            console.log('Successfully wrote file')
+        }
+    });
+    } catch (err) {
+      console.error('Error al procesar los datos:', err);
+      res.status(500).json({ error: 'Error al cargar los datos' });
+    }}); 
+  
 //Buscador
 // app.get('/buscar', async (req, res) => {
 //   try {
@@ -743,6 +827,7 @@ app.get('/buscar', async (req, res) => {
                 return {
                     Nombre: comida.Nombre,
                     Precio: comida.Precio,
+                    Id_Comida: comida.Id_Comida,
                     Ingredientes: ingredientesDeLaComida,
                     Disponibilidad: sucursalesDisponibles,
                     TiempoPrepa: comida.TiempoPrepa,
