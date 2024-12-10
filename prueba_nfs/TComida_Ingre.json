@@ -1,6 +1,10 @@
 [
  {
-  "Id_Ingrediente": 4,
+  "Id_Ingrediente": 11,
+  "Id_Comida": 1
+},
+{
+  "Id_Ingrediente": 10,
   "Id_Comida": 1
 },
  {

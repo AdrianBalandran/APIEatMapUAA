@@ -38,5 +38,9 @@
  {
    "Id_Ingrediente": 10,
    "Nombre": "Bolillo"
-  }
+  },
+  {
+    "Id_Ingrediente": 11,
+    "Nombre": "Tamal"
+   }
 ]
