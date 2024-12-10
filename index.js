@@ -718,11 +718,14 @@ app.post('/comidaid', async (req, res) => {
 //   }
 // });
 
+
+//Endpoint del buscador
 app.get('/buscar', async (req, res) => {
   try {
-    const { query, tipo } = req.query;
-    if (!query || !tipo) {
-      return res.status(400).json({ error: 'Los parámetros "query" y "tipo" son obligatorios.' });
+    const { query = '', tipo } = req.query;
+
+    if (!tipo) {
+      return res.status(400).json({ error: 'El parámetro "tipo" es obligatorio.' });
     }
 
     let resultados = [];
@@ -735,22 +738,25 @@ app.get('/buscar', async (req, res) => {
 
     switch (tipo.toLowerCase()) {
       case 'comida':
-        const comidasEncontradas = comidasData.filter(comida =>
-          comida.Nombre.toLowerCase().includes(query.toLowerCase())
-        );
-        resultados = comidasEncontradas.map(comida => {
+        const comidasFiltradas = query.trim()
+          ? comidasData.filter(comida => comida.Nombre.toLowerCase().includes(query.toLowerCase()))
+          : comidasData;
+
+        resultados = comidasFiltradas.map(comida => {
           const ingredientesDeLaComida = comidaIngreData
             .filter(rel => rel.Id_Comida === comida.Id_Comida)
             .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
 
           const sucursalesDisponibles = cafeteriaSucData
-            .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria && rel.Id_Sucursal === comida.Id_Sucursal)
+            .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria)
             .map(rel => {
               const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
               const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
               return {
                 Cafeteria: cafeteria?.Nombre || null,
                 Sucursal: sucursal?.Nombre || null,
+                NumeroLocal: rel.Numero_Local,
+                Edificio: sucursal?.Edificio || null,
               };
             });
 
@@ -758,83 +764,104 @@ app.get('/buscar', async (req, res) => {
             ...comida,
             Ingredientes: ingredientesDeLaComida,
             Disponibilidad: sucursalesDisponibles,
-            TiempoPrepa: comida.TiempoPrepa, // Se añade el tiempo de preparación
+            TiempoPrepa: comida.TiempoPrepa,
           };
         });
         break;
 
-        case 'cafeteria':
-          const cafeteriaEncontrada = cafeteriasData.find(caf =>
-              caf.Nombre.toLowerCase().includes(query.toLowerCase())
-          );
-          if (!cafeteriaEncontrada) {
-              return res.status(404).json({ error: 'Cafetería no encontrada.' });
-          }
-      
-          const sucursalesDeCafeteria = cafeteriaSucData
-              .filter(rel => rel.Id_Cafeteria === cafeteriaEncontrada.Id_Cafeteria)
+      case 'cafeteria':
+        if (!query.trim()) {
+          resultados = cafeteriasData.map(cafeteria => {
+            const sucursalesDeCafeteria = cafeteriaSucData
+              .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
               .map(rel => {
-                  const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-                  return {
-                      NombreSucursal: sucursal?.Nombre || null,
-                      Horario: rel.Horario,
-                      NumeroLocal: rel.Numero_Local, // 'Numero_Local' es correcto aquí
-                      Edificio: sucursal?.Edificio || null, // Obtener edificio desde TSucursal
-                  };
-              });
-      
-          resultados.push({
-              Nombre: cafeteriaEncontrada.Nombre,
-              Sucursales: sucursalesDeCafeteria,
-          });
-          break;
-      
-
-          case 'ingrediente':
-            const ingredienteEncontrado = ingredientesData.find(ing =>
-                ing.Nombre.toLowerCase().includes(query.toLowerCase())
-            );
-            if (!ingredienteEncontrado) {
-                return res.status(404).json({ error: 'Ingrediente no encontrado.' });
-            }
-        
-            const comidasConIngrediente = comidaIngreData
-                .filter(rel => rel.Id_Ingrediente === ingredienteEncontrado.Id_Ingrediente)
-                .map(rel => comidasData.find(comida => comida.Id_Comida === rel.Id_Comida));
-        
-            if (comidasConIngrediente.length === 0) {
-                return res.status(404).json({ error: `No se encontraron comidas con el ingrediente: ${query}` });
-            }
-        
-            resultados = comidasConIngrediente.map(comida => {
-                const ingredientesDeLaComida = comidaIngreData
-                    .filter(rel => rel.Id_Comida === comida.Id_Comida)
-                    .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
-        
-                const sucursalesDisponibles = cafeteriaSucData
-                    .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria)
-                    .map(rel => {
-                        const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-                        const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
-                        return {
-                            Cafeteria: cafeteria?.Nombre || null,
-                            Sucursal: sucursal?.Nombre || null,
-                            NumeroLocal: rel.Numero_Local, // Añadido aquí
-                            Edificio: sucursal?.Edificio || null, // Añadido aquí
-                        };
-                    });
-        
+                const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
                 return {
-                    Nombre: comida.Nombre,
-                    Precio: comida.Precio,
-                    Id_Comida: comida.Id_Comida,
-                    Ingredientes: ingredientesDeLaComida,
-                    Disponibilidad: sucursalesDisponibles,
-                    TiempoPrepa: comida.TiempoPrepa,
+                  NombreSucursal: sucursal?.Nombre || null,
+                  Horario: rel.Horario,
+                  NumeroLocal: rel.Numero_Local,
+                  Edificio: sucursal?.Edificio || null,
                 };
-            });
-            break;
-        
+              });
+
+            return {
+              Nombre: cafeteria.Nombre,
+              Sucursales: sucursalesDeCafeteria,
+            };
+          });
+        } else {
+          const cafeteriaEncontrada = cafeteriasData.filter(caf =>
+            caf.Nombre.toLowerCase().includes(query.toLowerCase())
+          );
+
+          if (cafeteriaEncontrada.length === 0) {
+            return res.status(404).json({ error: 'Cafetería no encontrada.' });
+          }
+
+          resultados = cafeteriaEncontrada.map(cafeteria => {
+            const sucursalesDeCafeteria = cafeteriaSucData
+              .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
+              .map(rel => {
+                const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+                return {
+                  NombreSucursal: sucursal?.Nombre || null,
+                  Horario: rel.Horario,
+                  NumeroLocal: rel.Numero_Local,
+                  Edificio: sucursal?.Edificio || null,
+                };
+              });
+
+            return {
+              Nombre: cafeteria.Nombre,
+              Sucursales: sucursalesDeCafeteria,
+            };
+          });
+        }
+        break;
+
+      case 'ingrediente':
+        const ingredientesFiltrados = query.trim()
+          ? ingredientesData.filter(ing => ing.Nombre.toLowerCase().includes(query.toLowerCase()))
+          : ingredientesData;
+
+        if (ingredientesFiltrados.length === 0) {
+          return res.status(404).json({ error: 'Ingrediente no encontrado.' });
+        }
+
+        resultados = ingredientesFiltrados.flatMap(ingrediente => {
+          const comidasConIngrediente = comidaIngreData
+            .filter(rel => rel.Id_Ingrediente === ingrediente.Id_Ingrediente)
+            .map(rel => comidasData.find(comida => comida.Id_Comida === rel.Id_Comida));
+
+          return comidasConIngrediente.filter(comida => comida).map(comida => {
+            const ingredientesDeLaComida = comidaIngreData
+              .filter(rel => rel.Id_Comida === comida.Id_Comida)
+              .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
+
+            const sucursalesDisponibles = cafeteriaSucData
+              .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria)
+              .map(rel => {
+                const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+                const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
+                return {
+                  Cafeteria: cafeteria?.Nombre || null,
+                  Sucursal: sucursal?.Nombre || null,
+                  NumeroLocal: rel.Numero_Local,
+                  Edificio: sucursal?.Edificio || null,
+                };
+              });
+
+            return {
+              Nombre: comida.Nombre,
+              Precio: comida.Precio,
+              Id_Comida: comida.Id_Comida,
+              Ingredientes: ingredientesDeLaComida,
+              Disponibilidad: sucursalesDisponibles,
+              TiempoPrepa: comida.TiempoPrepa,
+            };
+          });
+        });
+        break;
 
       default:
         return res.status(400).json({ error: 'El tipo de búsqueda no es válido. Usa "comida", "cafeteria" o "ingrediente".' });
@@ -847,103 +874,6 @@ app.get('/buscar', async (req, res) => {
   }
 });
 
-//Mostrar todo el contenido
-app.get('/filtrar', async (req, res) => {
-  try {
-    const { tipo } = req.query;
-
-    if (!tipo) {
-      return res.status(400).json({ error: 'El parámetro "tipo" es obligatorio.' });
-    }
-
-    // Cargar los datos
-    const comidasData = await readJsonFile(path.join(nfsPath, 'TComida.json'));
-    const ingredientesData = await readJsonFile(path.join(nfsPath, 'TIngredientes.json'));
-    const comidaIngreData = await readJsonFile(path.join(nfsPath, 'TComida_Ingre.json'));
-    const cafeteriasData = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
-    const sucursalesData = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
-    const cafeteriaSucData = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
-
-    let resultados = [];
-
-    // Filtrar según el tipo
-    switch (tipo.toLowerCase()) {
-      case 'comida':
-        resultados = comidasData.map(comida => {
-          const ingredientesDeLaComida = comidaIngreData
-            .filter(rel => rel.Id_Comida === comida.Id_Comida)
-            .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
-
-          const sucursalesDisponibles = cafeteriaSucData
-            .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria && rel.Id_Sucursal === comida.Id_Sucursal)
-            .map(rel => {
-              const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-              const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
-              return {
-                Cafeteria: cafeteria?.Nombre || null,
-                Sucursal: sucursal?.Nombre || null,
-              };
-            });
-
-          return {
-            Nombre: comida.Nombre,
-            Precio: comida.Precio,
-            Ingredientes: ingredientesDeLaComida,
-            Disponibilidad: sucursalesDisponibles,
-            TiempoPrepa: comida.TiempoPrepa,
-          };
-        });
-        break;
-
-      case 'cafeteria':
-        resultados = cafeteriasData.map(cafeteria => {
-          const sucursalesDeCafeteria = cafeteriaSucData
-            .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
-            .map(rel => {
-              const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-              return {
-                NombreSucursal: sucursal?.Nombre || null,
-                Horario: rel.Horario,
-                NumeroLocal: rel.Numero_Local,
-                Edificio: sucursal?.Edificio || null,
-              };
-            });
-
-          return {
-            Nombre: cafeteria.Nombre,
-            Sucursales: sucursalesDeCafeteria,
-          };
-        });
-        break;
-
-      case 'ingrediente':
-        resultados = ingredientesData.map(ingrediente => {
-          const comidasConIngrediente = comidaIngreData
-            .filter(rel => rel.Id_Ingrediente === ingrediente.Id_Ingrediente)
-            .map(rel => comidasData.find(comida => comida.Id_Comida === rel.Id_Comida))
-            .filter(Boolean); // Elimina elementos nulos
-
-          return {
-            Nombre: ingrediente.Nombre,
-            UsadoEnComidas: comidasConIngrediente.map(comida => ({
-              Nombre: comida?.Nombre,
-              Precio: comida?.Precio,
-              TiempoPrepa: comida?.TiempoPrepa,
-            })),
-          };
-        });
-        break;
-
-      default:
-        return res.status(400).json({ error: 'El tipo no es válido. Usa "comida", "cafeteria" o "ingrediente".' });
-    }
-
-    res.json(resultados);
-  } catch (err) {
-    console.error('Error en el endpoint filtrar:', err);
-    res.status(500).json({ error: 'Error al procesar la solicitud.' });
-  }
-});
   
 // Iniciar el servidor
 app.listen(PORT, () => {
