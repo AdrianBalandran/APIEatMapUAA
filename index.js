@@ -874,6 +874,71 @@ app.get('/buscar', async (req, res) => {
   }
 });
 
+app.post('/cafeterias/sucursales', async (req, res) => {
+  try {
+    var data = req.body;
+    // Leer el archivo
+    const Sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const CafeteriaSuc = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+    const CafeSucu = CafeteriaSuc
+    .filter(rel => rel.Id_Cafeteria === Number(data.Id_Cafeteria))
+    .map(cafe => {
+          const NombreSucu = Sucursales.find(sucu => sucu.Id_Sucursal == cafe.Id_Sucursal).Nombre;
+          const Edificio = Sucursales.find(sucu => sucu.Id_Sucursal == cafe.Id_Sucursal).Edificio;
+        return {
+          NombreSucursal: NombreSucu,
+          Edificio: Edificio,
+          ...cafe,
+        };
+    });
+    
+
+    // Enviar respuesta
+    res.json(CafeSucu);
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }}); 
+
+  app.post('/pedido/agregar', async (req, res) => {
+    try {
+      var data = req.body;
+
+      // Leer el archivo
+      const Pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
+      const TOrden_Comida = await readJsonFile(path.join(nfsPath, 'TOrden_Comida.json'));
+
+      const idpedido = Pedidos[Pedidos.length-1].Orden+1; 
+      data.Pedido.Orden = idpedido; 
+      Pedidos.push(data.Pedido); 
+
+      TOrden_Comida.push({Id_Orden: idpedido, Id_Comida: data.Comida.Id_Comida}); 
+
+      
+      let jsonString = JSON.stringify(Pedidos); 
+      fs.writeFile(path.join(nfsPath, 'TPedido.json'), jsonString, err => {
+        if (err) {
+            console.log('Error writing file', err)
+        } else {
+        }
+      }); 
+      jsonString = JSON.stringify(TOrden_Comida); 
+      fs.writeFile(path.join(nfsPath, 'TOrden_Comida.json'), jsonString, err => {
+        if (err) {
+            console.log('Error writing file', err)
+        } else {
+        }
+      }); 
+
+      res.json({Status: true});
+
+    
+    } catch (err) {
+      console.error('Error al procesar los datos:', err);
+      res.status(500).json({ error: 'Error al cargar los datos' });
+    }}); 
+
   
 // Iniciar el servidor
 app.listen(PORT, () => {
