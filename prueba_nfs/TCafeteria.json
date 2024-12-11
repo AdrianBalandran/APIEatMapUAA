@@ -30,5 +30,29 @@
 {
   "Id_Cafeteria": 8,
   "Nombre": "Fiesta Mexicana"
+},
+{
+  "Id_Cafeteria": 9,
+  "Nombre": "Cerezza"
+},
+{
+  "Id_Cafeteria": 10,
+  "Nombre": "Chocos de la Puri"
+},
+{
+  "Id_Cafeteria": 11,
+  "Nombre": "Nutriletas"
+},
+{
+  "Id_Cafeteria": 12,
+  "Nombre": "Klauc´k"
+},
+{
+  "Id_Cafeteria": 13,
+  "Nombre": "Corazón"
+},
+{
+  "Id_Cafeteria": 14,
+  "Nombre": "Cetriolo"
 }
 ]

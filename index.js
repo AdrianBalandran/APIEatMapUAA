@@ -777,8 +777,9 @@ app.get('/buscar', async (req, res) => {
         });
         break;
 
-      case 'cafeteria':
-        if (!query.trim()) {
+        case 'cafeteria':
+          const queryLower = query.trim().toLowerCase();
+        
           resultados = cafeteriasData.map(cafeteria => {
             const sucursalesDeCafeteria = cafeteriaSucData
               .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
@@ -791,41 +792,28 @@ app.get('/buscar', async (req, res) => {
                   Edificio: sucursal?.Edificio || null,
                 };
               });
-
+        
             return {
               Nombre: cafeteria.Nombre,
               Sucursales: sucursalesDeCafeteria,
             };
           });
-        } else {
-          const cafeteriaEncontrada = cafeteriasData.filter(caf =>
-            caf.Nombre.toLowerCase().includes(query.toLowerCase())
-          );
-
-          if (cafeteriaEncontrada.length === 0) {
-            return res.status(404).json({ error: 'Cafetería no encontrada.' });
+        
+          // Filtrar por cafetería o sucursal si la query está presente
+          if (queryLower) {
+            resultados = resultados.filter(item =>
+              item.Nombre.toLowerCase().includes(queryLower) ||
+              item.Sucursales.some(sucursal =>
+                sucursal.NombreSucursal?.toLowerCase().includes(queryLower)
+              )
+            );
           }
-
-          resultados = cafeteriaEncontrada.map(cafeteria => {
-            const sucursalesDeCafeteria = cafeteriaSucData
-              .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
-              .map(rel => {
-                const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-                return {
-                  NombreSucursal: sucursal?.Nombre || null,
-                  Horario: rel.Horario,
-                  NumeroLocal: rel.Numero_Local,
-                  Edificio: sucursal?.Edificio || null,
-                };
-              });
-
-            return {
-              Nombre: cafeteria.Nombre,
-              Sucursales: sucursalesDeCafeteria,
-            };
-          });
-        }
-        break;
+        
+          if (resultados.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron cafeterías o sucursales que coincidan con la búsqueda.' });
+          }
+          break;
+        
 
       case 'ingrediente':
         const ingredientesFiltrados = query.trim()
@@ -881,6 +869,71 @@ app.get('/buscar', async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la solicitud.' });
   }
 });
+
+app.post('/cafeterias/sucursales', async (req, res) => {
+  try {
+    var data = req.body;
+    // Leer el archivo
+    const Sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const CafeteriaSuc = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+    const CafeSucu = CafeteriaSuc
+    .filter(rel => rel.Id_Cafeteria === Number(data.Id_Cafeteria))
+    .map(cafe => {
+          const NombreSucu = Sucursales.find(sucu => sucu.Id_Sucursal == cafe.Id_Sucursal).Nombre;
+          const Edificio = Sucursales.find(sucu => sucu.Id_Sucursal == cafe.Id_Sucursal).Edificio;
+        return {
+          NombreSucursal: NombreSucu,
+          Edificio: Edificio,
+          ...cafe,
+        };
+    });
+    
+
+    // Enviar respuesta
+    res.json(CafeSucu);
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }}); 
+
+  app.post('/pedido/agregar', async (req, res) => {
+    try {
+      var data = req.body;
+
+      // Leer el archivo
+      const Pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
+      const TOrden_Comida = await readJsonFile(path.join(nfsPath, 'TOrden_Comida.json'));
+
+      const idpedido = Pedidos[Pedidos.length-1].Orden+1; 
+      data.Pedido.Orden = idpedido; 
+      Pedidos.push(data.Pedido); 
+
+      TOrden_Comida.push({Id_Orden: idpedido, Id_Comida: data.Comida.Id_Comida}); 
+
+      
+      let jsonString = JSON.stringify(Pedidos); 
+      fs.writeFile(path.join(nfsPath, 'TPedido.json'), jsonString, err => {
+        if (err) {
+            console.log('Error writing file', err)
+        } else {
+        }
+      }); 
+      jsonString = JSON.stringify(TOrden_Comida); 
+      fs.writeFile(path.join(nfsPath, 'TOrden_Comida.json'), jsonString, err => {
+        if (err) {
+            console.log('Error writing file', err)
+        } else {
+        }
+      }); 
+
+      res.json({Status: true});
+
+    
+    } catch (err) {
+      console.error('Error al procesar los datos:', err);
+      res.status(500).json({ error: 'Error al cargar los datos' });
+    }}); 
 
   
 // Iniciar el servidor
