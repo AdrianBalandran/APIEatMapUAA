@@ -558,9 +558,12 @@ app.post('/comidaid', async (req, res) => {
 
   app.post('/pedido/entregado', async (req, res) => {
     try {
+
       // Leer el archivo
       const Pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
       var data = req.body;
+
+      console.log(data.Orden)
   
       for(let pedido of Pedidos){
         if(pedido.Orden == Number(data.Orden)){
@@ -568,14 +571,19 @@ app.post('/comidaid', async (req, res) => {
         }
       }
 
+      var result;
       const jsonString = JSON.stringify(Pedidos); 
       fs.writeFile(path.join(nfsPath, 'TPedido.json'), jsonString, err => {
         if (err) {
             console.log('Error writing file', err)
+            result = false;
         } else {
             console.log('Successfully wrote file')
+            result = true;
         }
-    });
+      });
+      
+      res.json(result);
     } catch (err) {
       console.error('Error al procesar los datos:', err);
       res.status(500).json({ error: 'Error al cargar los datos' });
