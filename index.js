@@ -769,8 +769,9 @@ app.get('/buscar', async (req, res) => {
         });
         break;
 
-      case 'cafeteria':
-        if (!query.trim()) {
+        case 'cafeteria':
+          const queryLower = query.trim().toLowerCase();
+        
           resultados = cafeteriasData.map(cafeteria => {
             const sucursalesDeCafeteria = cafeteriaSucData
               .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
@@ -783,41 +784,28 @@ app.get('/buscar', async (req, res) => {
                   Edificio: sucursal?.Edificio || null,
                 };
               });
-
+        
             return {
               Nombre: cafeteria.Nombre,
               Sucursales: sucursalesDeCafeteria,
             };
           });
-        } else {
-          const cafeteriaEncontrada = cafeteriasData.filter(caf =>
-            caf.Nombre.toLowerCase().includes(query.toLowerCase())
-          );
-
-          if (cafeteriaEncontrada.length === 0) {
-            return res.status(404).json({ error: 'Cafetería no encontrada.' });
+        
+          // Filtrar por cafetería o sucursal si la query está presente
+          if (queryLower) {
+            resultados = resultados.filter(item =>
+              item.Nombre.toLowerCase().includes(queryLower) ||
+              item.Sucursales.some(sucursal =>
+                sucursal.NombreSucursal?.toLowerCase().includes(queryLower)
+              )
+            );
           }
-
-          resultados = cafeteriaEncontrada.map(cafeteria => {
-            const sucursalesDeCafeteria = cafeteriaSucData
-              .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
-              .map(rel => {
-                const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-                return {
-                  NombreSucursal: sucursal?.Nombre || null,
-                  Horario: rel.Horario,
-                  NumeroLocal: rel.Numero_Local,
-                  Edificio: sucursal?.Edificio || null,
-                };
-              });
-
-            return {
-              Nombre: cafeteria.Nombre,
-              Sucursales: sucursalesDeCafeteria,
-            };
-          });
-        }
-        break;
+        
+          if (resultados.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron cafeterías o sucursales que coincidan con la búsqueda.' });
+          }
+          break;
+        
 
       case 'ingrediente':
         const ingredientesFiltrados = query.trim()

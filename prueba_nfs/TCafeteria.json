@@ -30,5 +30,9 @@
 {
   "Id_Cafeteria": 8,
   "Nombre": "Fiesta Mexicana"
+},
+{
+  "Id_Cafeteria": 9,
+  "Nombre": "Cerezza"
 }
 ]

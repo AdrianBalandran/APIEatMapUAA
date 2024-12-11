@@ -18,6 +18,18 @@
   "Numero_Local": 3
 },
 {
+  "Id_Cafeteria": 3,
+  "Id_Sucursal": 2,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 1
+},
+{
+  "Id_Cafeteria": 9,
+  "Id_Sucursal": 2,
+  "Horario": "8 a.m - 6 p.m",
+  "Numero_Local": 2
+},
+{
   "Id_Cafeteria": 4,
   "Id_Sucursal": 1,
   "Horario": "8 a.m - 6 p.m",
