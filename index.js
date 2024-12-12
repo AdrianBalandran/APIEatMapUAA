@@ -932,6 +932,7 @@ app.post('/cafeterias/sucursales', async (req, res) => {
     
     } catch (err) {
       console.error('Error al procesar los datos:', err);
+      //console.log('Datos recibidos:', req.body);
       res.status(500).json({ error: 'Error al cargar los datos' });
     }}); 
 
