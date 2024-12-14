@@ -560,6 +560,65 @@ app.post('/comidaid', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
   }}); 
 
+  //Buscar cafeteria por id (para mostrar información)
+  app.post('/cafeteriaid', async (req, res) => {
+    try {
+      // Cargar archivos JSON
+      const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+      const cafeteriaSuc = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+      const sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+  
+      console.log('Request Body:', req.body);
+      const { Id_Cafeteria } = req.body;
+  
+      // Validar que el ID de la cafetería sea proporcionado
+      if (!Id_Cafeteria) {
+        return res.status(400).json({ error: 'Se requiere el Id_Cafeteria en la solicitud' });
+      }
+  
+      // Buscar la cafetería
+      const cafeteria = cafeterias.find(caf => caf.Id_Cafeteria === Number(Id_Cafeteria));
+      if (!cafeteria) {
+        return res.status(404).json({ error: 'Cafetería no encontrada' });
+      }
+  
+      // Obtener las sucursales asociadas a la cafetería
+      const sucursalesDeCafeteria = cafeteriaSuc
+        .filter(rel => rel.Id_Cafeteria === Number(Id_Cafeteria))
+        .map(rel => {
+          const sucursal = sucursales.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+          return {
+            NombreSucursal: sucursal?.Nombre || 'Nombre no disponible',
+            Horario: rel.Horario || 'Horario no disponible',
+            NumeroLocal: rel.Numero_Local || 'Número de local no disponible',
+            Edificio: sucursal?.Edificio || 'Edificio no disponible',
+          };
+        });
+  
+      // Validar si la cafetería tiene sucursales asociadas
+      if (sucursalesDeCafeteria.length === 0) {
+        return res.status(404).json({ 
+          Nombre: cafeteria.Nombre,
+          mensaje: 'La cafetería no tiene sucursales asociadas',
+          Sucursales: [],
+        });
+      }
+  
+      // Construir y devolver la respuesta
+      const response = {
+        Nombre: cafeteria.Nombre,
+        Sucursales: sucursalesDeCafeteria,
+      };
+  
+      res.json(response);
+    } catch (error) {
+      console.error('Error al obtener detalles de la cafetería:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+  
+  
+
 
   app.post('/pedido/entregado', async (req, res) => {
     try {
@@ -832,6 +891,7 @@ app.get('/buscar', async (req, res) => {
               });
         
             return {
+              Id_Cafeteria: cafeteria.Id_Cafeteria, // Agregar el ID de la cafetería
               Nombre: cafeteria.Nombre,
               Sucursales: sucursalesDeCafeteria,
             };
