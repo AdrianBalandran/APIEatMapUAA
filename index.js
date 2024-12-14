@@ -567,8 +567,9 @@ app.post('/comidaid', async (req, res) => {
       const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
       const cafeteriaSuc = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
       const sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+      const usuariosEncargados = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+      const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
   
-      console.log('Request Body:', req.body);
       const { Id_Cafeteria } = req.body;
   
       // Validar que el ID de la cafetería sea proporcionado
@@ -587,17 +588,29 @@ app.post('/comidaid', async (req, res) => {
         .filter(rel => rel.Id_Cafeteria === Number(Id_Cafeteria))
         .map(rel => {
           const sucursal = sucursales.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+  
+          // Buscar el encargado que coincida con Id_Cafeteria e Id_Sucursal
+          const encargado = usuariosEncargados.find(
+            e => e.Id_Sucursal === rel.Id_Sucursal && e.Id_Cafeteria === Number(Id_Cafeteria)
+          );
+  
+          // Obtener el teléfono del encargado si existe
+          const telefono = encargado
+            ? usuarios.find(u => u.Id_Usuario === encargado.Id_Usuario)?.Telefono
+            : null;
+  
           return {
             NombreSucursal: sucursal?.Nombre || 'Nombre no disponible',
             Horario: rel.Horario || 'Horario no disponible',
             NumeroLocal: rel.Numero_Local || 'Número de local no disponible',
             Edificio: sucursal?.Edificio || 'Edificio no disponible',
+            Telefono: telefono || null,
           };
         });
   
       // Validar si la cafetería tiene sucursales asociadas
       if (sucursalesDeCafeteria.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           Nombre: cafeteria.Nombre,
           mensaje: 'La cafetería no tiene sucursales asociadas',
           Sucursales: [],
@@ -616,6 +629,7 @@ app.post('/comidaid', async (req, res) => {
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   });
+  
   
   
 
