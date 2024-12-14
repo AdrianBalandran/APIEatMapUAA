@@ -974,6 +974,34 @@ app.post('/cafeterias/sucursales', async (req, res) => {
       res.status(500).json({ error: 'Error al cargar los datos' });
     }}); 
 
+    app.get('/telefonos/encargados', async (req, res) => {
+      try {
+        const TUsuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+        const TUsuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+        
+        const usuariosEncargados = TUsuario.filter(usuario => usuario.Tipo === "Encargado");
+      
+        const resultado = usuariosEncargados.map(encargado => {
+          const datosEncargado = TUsuario_Encar.find(
+            usuarioEncargado => usuarioEncargado.Id_Usuario === encargado.Id_Usuario
+          );
+  
+          return {
+           Id_Cafeteria: datosEncargado ? datosEncargado.Id_Cafeteria : null,
+           Id_Sucursal: datosEncargado ? datosEncargado.Id_Sucursal : null,
+           Telefono: encargado.Telefono,
+          };
+        });
+    
+        res.json(resultado);
+      } 
+      catch (err) {
+        res.status(500).json({ 
+            error: 'Error al cargar los datos de usuarios', 
+            mensaje: err.message 
+        });
+      }
+  });
   
 // Iniciar el servidor
 app.listen(PORT, () => {
