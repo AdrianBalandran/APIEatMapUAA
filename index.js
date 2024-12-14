@@ -183,11 +183,31 @@ app.get('/comidasxingredientes', async (req, res) => {
 
 
   
-  app.route('/usuarios').get(async (req, res) => {
+  app.route('/usuarios/crear').post(async (req, res) => {
     try {
+      var data = req.body;
+
       //Leer el archivo
       const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-      res.json(usuarios);
+      const usuario = usuarios.find(usuario => usuario.Email === data.Email);
+      if(!usuario){
+        const id = usuarios[usuarios.length-1].Id_Usuario+1
+        data.Id_Usuario = id; 
+        usuarios.push(data); 
+        const jsonString = JSON.stringify(usuarios); 
+        fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString); 
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Usuario creado.',
+          usuario: data.Id_Usuario
+        });
+      }else{
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Ya se ha utilizado ese correo.',
+          usuario: null 
+        });
+      }
     } 
     catch (err) {
       console.error('Error al procesar los datos: ', err);
@@ -337,21 +357,6 @@ app.get('/buscar-cafeteria', async (req, res) => {
   }
 });
 
-// Endpoint para buscar cafetería por nombre
-app.post('/usuario/nuevo', async (req, res) => {
-  var data = req.body;
-  const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-  usuarios.push(data); 
-
-  const jsonString = JSON.stringify(usuarios); 
-  fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString, err => {
-    if (err) {
-        console.log('Error writing file', err)
-    } else {
-        console.log('Successfully wrote file')
-    }
-})
-});
 
 
 // Endpoint para listar pedidos de cierto cliente
@@ -589,6 +594,39 @@ app.post('/comidaid', async (req, res) => {
       res.status(500).json({ error: 'Error al cargar los datos' });
     }}); 
   
+  app.post('/pedido/cancelado', async (req, res) => {
+    try {
+
+      // Leer el archivo
+      const Pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
+      var data = req.body;
+
+      console.log(data.Orden)
+  
+      for(let pedido of Pedidos){
+        if(pedido.Orden == Number(data.Orden)){
+          pedido.Pagado = "C"; 
+        }
+      }
+
+      var result;
+      const jsonString = JSON.stringify(Pedidos); 
+      fs.writeFile(path.join(nfsPath, 'TPedido.json'), jsonString, err => {
+        if (err) {
+            console.log('Error writing file', err)
+            result = false;
+        } else {
+            console.log('Successfully wrote file')
+            result = true;
+        }
+      });
+      
+      res.json(result);
+    } catch (err) {
+      console.error('Error al procesar los datos:', err);
+      res.status(500).json({ error: 'Error al cargar los datos' });
+    }}); 
+
 //Buscador
 // app.get('/buscar', async (req, res) => {
 //   try {
