@@ -182,96 +182,96 @@ app.get('/comidasxingredientes', async (req, res) => {
 });
 
 
-  
-  app.route('/usuarios/crear').post(async (req, res) => {
-    try {
-      var data = req.body;
+//Crear usuario
+app.route('/usuarios/crear').post(async (req, res) => {
+  try {
+    var data = req.body;
 
-      //Leer el archivo
-      const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-      const usuario = usuarios.find(usuario => usuario.Email === data.Email);
-      if(!usuario){
-        const id = usuarios[usuarios.length-1].Id_Usuario+1
-        data.Id_Usuario = id; 
-        usuarios.push(data); 
-        const jsonString = JSON.stringify(usuarios); 
-        fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString); 
-        return res.status(200).json({ 
-          success: true, 
-          message: 'Usuario creado.',
-          usuario: data.Id_Usuario
-        });
-      }else{
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Ya se ha utilizado ese correo.',
-          usuario: null 
-        });
-      }
-    } 
-    catch (err) {
-      console.error('Error al procesar los datos: ', err);
-      res.status(500).json({ error: 'Error al cargar los datos' });
-    }
-  });
-
-  //Login para la aplicación Android
-  app.route('/login').post(async (req, res) => {
-    try {
-      const { Correo, Contrasena } = req.body; //Correo y contraseña del cuerpo de la solicitud
-
-      if(!Correo || !Contrasena) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Se requiere correo o contraseña.',
-          usuario: null 
-        });
-      }
-  
-      //Leer el archivo de usuarios
-      const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-  
-      //Buscar Correo y Contraseña
-      const usuario = usuarios.find(usuario => usuario.Email === Correo);
-
-      if(!usuario) {
-        return res.status(404).json({
-          success: false,
-          message: 'El correo no está registrado.',
-          usuario: null 
-        });
-      }
-      
-      if(usuario.Contrasena !== Contrasena) {
-        return res.status(401).json({
-          success: false,
-          message: 'La contraseña es incorrecta.',
-          usuario: null 
-        });
-      }
-      
+    //Leer el archivo
+    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const usuario = usuarios.find(usuario => usuario.Email === data.Email);
+    if(!usuario){
+      const id = usuarios[usuarios.length-1].Id_Usuario+1
+      data.Id_Usuario = id; 
+      usuarios.push(data); 
+      const jsonString = JSON.stringify(usuarios); 
+      fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString); 
       return res.status(200).json({ 
         success: true, 
-        message: 'Inicio de sesión correcto.',
-        usuario: {
-          Id_Usuario: usuario.Id_Usuario,
-          Nombre: usuario.Nombre,
-          Primer_Apellido: usuario.Primer_Apellido,
-          Segundo_Apellido: usuario.Segundo_Apellido,
-          Telefono: usuario.Telefono,
-          Tipo: usuario.Tipo
-        }
+        message: 'Usuario creado.',
+        usuario: data.Id_Usuario
       });
-
-    } 
-    catch(err) {
-      console.error('Error en el inicio de sesión: ' + err);
-      res.status(500).json({ 
+    }else{
+      return res.status(400).json({ 
         success: false, 
-        message: 'Error interno del servidor' 
+        message: 'Ya se ha utilizado ese correo.',
+        usuario: null 
       });
     }
-  });
+  } 
+  catch (err) {
+    console.error('Error al procesar los datos: ', err);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }
+});
+
+//Login para la aplicación Android
+app.route('/login').post(async (req, res) => {
+  try {
+    const { Correo, Contrasena } = req.body; //Correo y contraseña del cuerpo de la solicitud
+
+    if(!Correo || !Contrasena) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Se requiere correo o contraseña.',
+        usuario: null 
+      });
+    }
+
+    //Leer el archivo de usuarios
+    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+
+    //Buscar Correo y Contraseña
+    const usuario = usuarios.find(usuario => usuario.Email === Correo);
+
+    if(!usuario) {
+      return res.status(404).json({
+        success: false,
+        message: 'El correo no está registrado.',
+        usuario: null 
+      });
+    }
+    
+    if(usuario.Contrasena !== Contrasena) {
+      return res.status(401).json({
+        success: false,
+        message: 'La contraseña es incorrecta.',
+        usuario: null 
+      });
+    }
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Inicio de sesión correcto.',
+      usuario: {
+        Id_Usuario: usuario.Id_Usuario,
+        Nombre: usuario.Nombre,
+        Primer_Apellido: usuario.Primer_Apellido,
+        Segundo_Apellido: usuario.Segundo_Apellido,
+        Telefono: usuario.Telefono,
+        Tipo: usuario.Tipo
+      }
+    });
+
+  } 
+  catch(err) {
+    console.error('Error en el inicio de sesión: ' + err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error interno del servidor' 
+    });
+  }
+});
 
 
   // Endpoint para buscar comida por nombre
@@ -974,6 +974,112 @@ app.post('/cafeterias/sucursales', async (req, res) => {
       res.status(500).json({ error: 'Error al cargar los datos' });
     }}); 
 
+  app.post('/usuario/info', async (req, res) => {
+    try {
+      var data = req.body;
+
+      // Leer el archivo
+      const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+
+      const usuario = Usuarios
+      .filter(rel => rel.Id_Usuario !== Number(data.Id_Usuario))
+      .map(usuario => {
+            const NombreC = usuario.Nombre + " " + usuario.Primer_Apellido + " " + usuario.Segundo_Apellido;
+          return {
+            Nombre_Completo: NombreC, 
+            Tipo: usuario.Tipo,
+            Id_Usuario: usuario.Id_Usuario
+          };
+      });
+    
+      res.json(usuario);
+
+    } catch (err) {
+      console.error('Error al procesar los datos:', err);
+      //console.log('Datos recibidos:', req.body);
+      res.status(500).json({ error: 'Error al cargar los datos' });
+    }}); 
+  
+app.get('/cafeusu/todos', async (req, res) => {
+  try {
+    // Leer el archivo
+    const Cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const Sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const CafeSucu = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+
+    const cafeteria = Cafeterias
+    .map(cafeteria => {
+        const cafesucu = CafeSucu
+        .filter(rel => rel.Id_Cafeteria === cafeteria.Id_Cafeteria)
+        .map(sucu => {
+          const nombres = Sucursales.find(rel => rel.Id_Sucursal === sucu.Id_Sucursal); 
+          return {
+            Nombre_Sucursal: nombres.Nombre, 
+            Id_Sucursal: nombres.Id_Sucursal
+          }
+        }); 
+        return {
+          Id_Cafeteria: cafeteria.Id_Cafeteria,
+          Nombre_Cafeteria: cafeteria.Nombre, 
+          Sucursales: cafesucu
+        };
+    });
+  
+    res.json(cafeteria);
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    //console.log('Datos recibidos:', req.body);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+}}); 
+  
+app.post('/usuario/cambiar', async (req, res) => {
+  try {
+    var data = req.body;
+
+    // Leer el archivo
+    const Usuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const TUsuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+
+    if(!Usuario.find(rel => rel.Id_Usuario === Number(data.Id_Usuario))){
+      return res.status(400).json({ 
+        success: false, 
+        message: 'El Id_Usuario no coincide.',
+      });
+    }
+    for(usu of Usuario){
+      if(usu.Id_Usuario == Number(data.Id_Usuario)){
+        usu.Tipo = data.Tipo; 
+        if(data.Tipo === "Encargado"){
+          if(TUsuario_Encar.find(rel => rel.Id_Usuario === Number(data.Id_Usuario))){
+            return res.status(400).json({ 
+              success: false, 
+              message: 'El Id_Usuario no esta en encargados.',
+            });
+          }
+          const jsonString = JSON.stringify(usuarios); 
+          fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString); 
+          return res.status(200).json({ 
+            success: true, 
+            message: 'Usuario creado.',
+            usuario: data.Id_Usuario
+          });
+        }
+      }
+    }
+
+
+
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    //console.log('Datos recibidos:', req.body);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+}}); 
+  
+  
+    
   
 // Iniciar el servidor
 app.listen(PORT, () => {
