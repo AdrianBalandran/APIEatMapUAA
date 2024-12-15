@@ -1200,10 +1200,10 @@ app.get('/cafeusu/todos', async (req, res) => {
   
     res.json(cafeteria);
 
-  } catch (err) {
-    console.error('Error al procesar los datos:', err);
-    //console.log('Datos recibidos:', req.body);
-    res.status(500).json({ error: 'Error al cargar los datos' });
+} catch (err) {
+  console.error('Error al procesar los datos:', err);
+  //console.log('Datos recibidos:', req.body);
+  res.status(500).json({ error: 'Error al cargar los datos' });
 }}); 
 
 
