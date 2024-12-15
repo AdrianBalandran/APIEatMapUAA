@@ -1,26 +1,113 @@
 const express = require('express');
-const fs = require('fs').promises; // Usamos las funciones de promesas del módulo fs
+const fs = require('fs').promises; //Usamos las funciones de promesas del módulo fs
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const crypto = require('crypto');
+
 app.use(express.json()); //Middleware para parsear JSON
-app.use(express.urlencoded({ extended: true })); // Middleware para parsear datos de formularios URL-encoded (opcional, pero útil)
+app.use(express.urlencoded({ extended: true })); //Middleware para parsear datos de formularios URL-encoded (opcional, pero útil)
+app.use(cors());
+app.use(bodyParser.json()); //Support parsing of application/json type post data
+app.use(bodyParser.urlencoded({ extended: true })); //Support parsing of application/x-www-form-urlencoded post data
 
 // Ruta al directorio NFS
 //const nfsPath = '\\\\192.168.100.25\\data\\menus';
 const nfsPath = path.join(__dirname, 'prueba_nfs');
+const ENCRYPTION_MARKER = '___ENCRYPTED_FILE___';
 
-const cors = require('cors');
-app.use(cors());
 
-bodyParser = require('body-parser');
+//Encriptar
+function encriptarArchivo(contenido, key, iv) {
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encriptado = cipher.update(JSON.stringify(contenido), 'utf8', 'hex');
+  encriptado += cipher.final('hex');
+  return encriptado;
+}
 
-// support parsing of application/json type post data
-app.use(bodyParser.json());
+function desencriptarArchivo(contenidoEncriptado, key, iv) {
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+  let desencriptado = decipher.update(contenidoEncriptado, 'hex', 'utf8');
+  desencriptado += decipher.final('utf8');
+  return JSON.parse(desencriptado);
+}
 
-//support parsing of application/x-www-form-urlencoded post data
-app.use(bodyParser.urlencoded({ extended: true }));
+async function encriptarArchivoUsuarios() {
+  try {
+    const filePath = path.join(nfsPath, 'TUsuario.json');
+    const data = await fs.readFile(filePath, 'utf8');
+    let contenido;
+
+    try {
+      contenido = JSON.parse(data);
+    } 
+    catch (err) {
+      console.error('El archivo no tiene un formato JSON válido.');
+      return;
+    }
+
+    //Verificar si está encriptado
+    if (contenido[ENCRYPTION_MARKER]) {
+      console.log('El archivo ya está encriptado');
+      return;
+    }
+
+    //Generar Key (Llave) y IV (Vector de Inicialización)
+    const SECRET_KEY = crypto.randomBytes(32);
+    const IV = crypto.randomBytes(16);
+
+    //Encriptar todo el contenido
+    const contenidoEncriptado = encriptarArchivo(contenido, SECRET_KEY, IV);
+
+    //Guardar con metadatos de encriptación
+    const archivoFinal = JSON.stringify({
+      [ENCRYPTION_MARKER]: true,
+      contenido: contenidoEncriptado,
+      iv: IV.toString('hex'),
+      key: SECRET_KEY.toString('hex')
+    });
+
+    await fs.writeFile(filePath, archivoFinal);
+    console.log('Archivo de usuarios encriptado.');
+  } 
+  catch (err) {
+    console.error('Error al encriptar archivo de usuarios:', err);
+  }
+}
+
+async function desencriptarArchivoUsuarios() {
+  try {
+    const filePath = path.join(nfsPath, 'TUsuario.json');
+    const data = await fs.readFile(filePath, 'utf8');
+    const archivoEncriptado = JSON.parse(data);
+
+    //Verificar si está encriptado
+    if (!archivoEncriptado[ENCRYPTION_MARKER]) {
+      return archivoEncriptado;
+    }
+
+    //Recuperar IV y clave
+    const iv = Buffer.from(archivoEncriptado.iv, 'hex');
+    const key = Buffer.from(archivoEncriptado.key, 'hex');
+
+    //Desencriptar contenido
+    const usuariosDesencriptados = desencriptarArchivo(
+      archivoEncriptado.contenido, 
+      key, 
+      iv
+    );
+
+    return usuariosDesencriptados;
+  } 
+  catch (err) {
+    console.error('Error al desencriptar archivo de usuarios:', err);
+    throw err;
+  }
+}
+//
 
 
 // Función para leer un archivo JSON
@@ -188,7 +275,7 @@ app.route('/usuarios/crear').post(async (req, res) => {
     var data = req.body;
 
     //Leer el archivo
-    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const usuarios = await desencriptarArchivoUsuarios();
     const usuario = usuarios.find(usuario => usuario.Email === data.Email);
     if(!usuario){
       const id = usuarios[usuarios.length-1].Id_Usuario+1
@@ -229,7 +316,7 @@ app.route('/login').post(async (req, res) => {
     }
 
     //Leer el archivo de usuarios
-    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const usuarios = await desencriptarArchivoUsuarios();
 
     //Buscar Correo y Contraseña
     const usuario = usuarios.find(usuario => usuario.Email === Correo);
@@ -412,7 +499,7 @@ app.post('/pedidos/getEnc', async (req, res) => {
 
     // // Leer los archivos
     const UsuarioEncargado = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
-    const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const Usuarios = await desencriptarArchivoUsuarios();
     const pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
     const cafeteria = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
     const sucursal = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
@@ -463,7 +550,7 @@ app.post('/pedidos/getEnc', async (req, res) => {
 app.post('/usuario/get', async (req, res) => {
   try {
     // Leer el archivo
-    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const usuarios = await desencriptarArchivoUsuarios();
     var data = req.body;
     for(usu of usuarios){
       if(usu.Email == data.Email){
@@ -480,7 +567,7 @@ app.post('/usuario/getsuyca', async (req, res) => {
   try {
     let id = ""; 
     // Leer el archivo
-    const usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const usuarios = await desencriptarArchivoUsuarios();
     const encargado = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
     const cafeteria =  await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
     const sucursal =  await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
@@ -567,8 +654,9 @@ app.post('/comidaid', async (req, res) => {
       const cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
       const cafeteriaSuc = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
       const sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+      const usuariosEncargados = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+      const usuarios = await desencriptarArchivoUsuarios();
   
-      console.log('Request Body:', req.body);
       const { Id_Cafeteria } = req.body;
   
       // Validar que el ID de la cafetería sea proporcionado
@@ -587,17 +675,29 @@ app.post('/comidaid', async (req, res) => {
         .filter(rel => rel.Id_Cafeteria === Number(Id_Cafeteria))
         .map(rel => {
           const sucursal = sucursales.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+  
+          // Buscar el encargado que coincida con Id_Cafeteria e Id_Sucursal
+          const encargado = usuariosEncargados.find(
+            e => e.Id_Sucursal === rel.Id_Sucursal && e.Id_Cafeteria === Number(Id_Cafeteria)
+          );
+  
+          // Obtener el teléfono del encargado si existe
+          const telefono = encargado
+            ? usuarios.find(u => u.Id_Usuario === encargado.Id_Usuario)?.Telefono
+            : null;
+  
           return {
             NombreSucursal: sucursal?.Nombre || 'Nombre no disponible',
             Horario: rel.Horario || 'Horario no disponible',
             NumeroLocal: rel.Numero_Local || 'Número de local no disponible',
             Edificio: sucursal?.Edificio || 'Edificio no disponible',
+            Telefono: telefono || null,
           };
         });
   
       // Validar si la cafetería tiene sucursales asociadas
       if (sucursalesDeCafeteria.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           Nombre: cafeteria.Nombre,
           mensaje: 'La cafetería no tiene sucursales asociadas',
           Sucursales: [],
@@ -616,6 +716,7 @@ app.post('/comidaid', async (req, res) => {
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   });
+  
   
   
 
@@ -1039,7 +1140,7 @@ app.post('/cafeterias/sucursales', async (req, res) => {
       var data = req.body;
 
       // Leer el archivo
-      const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+      const Usuarios = await desencriptarArchivoUsuarios();
 
       const usuario = Usuarios
       .filter(rel => rel.Id_Usuario !== Number(data.Id_Usuario))
@@ -1279,7 +1380,7 @@ app.post('/usuario/cambiar', async (req, res) => {
     
     app.get('/telefonos/encargados', async (req, res) => {
       try {
-        const TUsuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+        const TUsuario = await desencriptarArchivoUsuarios();
         const TUsuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
         
         const usuariosEncargados = TUsuario.filter(usuario => usuario.Tipo === "Encargado");
@@ -1307,6 +1408,7 @@ app.post('/usuario/cambiar', async (req, res) => {
   });
   
 // Iniciar el servidor
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await encriptarArchivoUsuarios();
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
