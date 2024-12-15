@@ -463,10 +463,8 @@ app.post('/pedidos', async (req, res) => {
     // const pedido = pedidos.find(ped => ped.Id_Usuario == data.Id_Usuario);
 
     // // Añadir pedido del usuario
-
-
     const PedidosUsuario = pedidos
-    .filter(rel => rel.Id_Usuario === data.Id_Usuario)
+    .filter(rel => rel.Id_Usuario === Number(data.Id_Usuario))
     .map(pedido => {
           const cafeteriaNom = cafeteria.find(caf => caf.Id_Cafeteria == pedido.Id_Cafeteria).Nombre;
           const sucursalNom = sucursal.find(suc => suc.Id_Sucursal == pedido.Id_Sucursal).Nombre;
@@ -481,7 +479,7 @@ app.post('/pedidos', async (req, res) => {
           ...pedido,
         };
     });
-    console.log(PedidosUsuario);
+
     // Enviar respuesta
     res.json(PedidosUsuario);
   } catch (err) {
@@ -723,7 +721,6 @@ app.post('/comidaid', async (req, res) => {
 
   app.post('/pedido/entregado', async (req, res) => {
     try {
-
       // Leer el archivo
       const Pedidos = await readJsonFile(path.join(nfsPath, 'TPedido.json'));
       var data = req.body;
@@ -1220,6 +1217,37 @@ app.get('/cafeusu/cafeterias', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
 }}); 
   
+app.post('/sucursal/cafeterias', async (req, res) => {
+  try {
+    var sucursal = req.body.Id_Usuario;
+
+    // Leer el archivo
+    const Cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const Sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const CafeSucu = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+    const id = Sucursales.find(suc => suc.Nombre == sucursal).Id_Sucursal;
+    console.log(id);
+
+    const cafeteria = CafeSucu
+      .filter(rel => rel.Id_Sucursal == id)
+      .map(sucCafe => {
+          const cafe = Cafeterias.find(caf => caf.Id_Cafeteria == sucCafe.Id_Cafeteria);
+          return {
+            Nombre_Cafeteria: cafe.Nombre,
+          };
+      });
+
+  
+    res.json(cafeteria);
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    //console.log('Datos recibidos:', req.body);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+}}); 
+  
+
 app.post('/usuario/info', async (req, res) => {
   try {
     var data = req.body;
