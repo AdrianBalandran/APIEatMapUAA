@@ -1364,6 +1364,7 @@ app.get('/cafeusu/todos', async (req, res) => {
       }
   });
 
+  //Provisionales
   app.get('/usuarios', async (req, res) => {
     try {
       // Desencriptar archivo TUsuario.json
@@ -1391,7 +1392,28 @@ app.get('/cafeusu/todos', async (req, res) => {
       });
     }
   });  
+
+  app.get('/usuarios/desencriptar', async (req, res) => {
+    try {
+      const usuarios = await desencriptarArchivoUsuarios();
+      const jsonString = JSON.stringify(usuarios);
+      await fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString);
   
+      return res.status(200).json({
+        success: true,
+        message: 'El archivo ha sido desencriptado correctamente.',
+      });
+    } 
+    catch (err) {
+      console.error('Error al desencriptar el archivo: ', err);
+      res.status(500).json({
+        success: false,
+        message: 'Error al desencriptar el archivo.',
+        error: err.message,
+      });
+    }
+  });  
+    
 // Iniciar el servidor
 app.listen(PORT, async () => {
   await encriptarArchivoUsuarios();
