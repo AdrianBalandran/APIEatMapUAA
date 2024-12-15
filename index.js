@@ -280,15 +280,27 @@ app.route('/usuarios/crear').post(async (req, res) => {
     if(!usuario){
       const id = usuarios[usuarios.length-1].Id_Usuario+1
       data.Id_Usuario = id; 
-      usuarios.push(data); 
-      const jsonString = JSON.stringify(usuarios); 
-      fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString); 
+      usuarios.push(data);
+      
+      //const jsonString = JSON.stringify(usuarios); 
+      const SECRET_KEY = crypto.randomBytes(32);
+      const IV = crypto.randomBytes(16);
+      const contenidoEncriptado = encriptarArchivo(usuarios, SECRET_KEY, IV);
+      const archivoFinal = JSON.stringify({
+        [ENCRYPTION_MARKER]: true,
+        contenido: contenidoEncriptado,
+        iv: IV.toString('hex'),
+        key: SECRET_KEY.toString('hex')
+      });
+
+      await fs.writeFile(path.join(nfsPath, 'TUsuario.json'), archivoFinal); 
       return res.status(200).json({ 
         success: true, 
         message: 'Usuario creado.',
         usuario: data.Id_Usuario
       });
-    }else{
+    }
+    else{
       return res.status(400).json({ 
         success: false, 
         message: 'Ya se ha utilizado ese correo.',
@@ -1193,108 +1205,136 @@ app.get('/cafeusu/todos', async (req, res) => {
     //console.log('Datos recibidos:', req.body);
     res.status(500).json({ error: 'Error al cargar los datos' });
 }}); 
-  
-app.post('/usuario/cambiar', async (req, res) => {
-  try {
-    var data = req.body;
 
-    // Leer el archivo
-    const Usuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
-    const Usuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
 
-    if(!Usuario.find(rel => rel.Id_Usuario === Number(data.Id_Usuario))){
-      return res.status(400).json({ 
-        success: false, 
-        message: 'El Id_Usuario no coincide.',
-      });
-    }
-    for(usu of Usuario){
-      if(usu.Id_Usuario == Number(data.Id_Usuario)){
-        if(usu.Tipo === data.Tipo){
-          if(usu.Tipo != "Encargado"){
-            return res.status(400).json({ 
-              success: false, 
-              message: 'No hubo cambio.',
-            });
-          }else{
-            for(ut of Usuario_Encar){
-              if(ut.Id_Usuario === Number(data.Id_Usuario)){
-                ut.Id_Cafeteria = Number(data.Id_Cafeteria); 
-                ut.Id_Sucursal = Number(data.Id_Sucursal); 
+    app.post('/usuario/cambiar', async (req, res) => {
+      try {
+        var data = req.body;
+        console.log(data);
+
+        // Leer el archivo
+        // const Usuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+        const Usuario = await desencriptarArchivoUsuarios();
+        const Usuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
+
+        if(!Usuario.find(rel => rel.Id_Usuario === Number(data.Id_Usuario))){
+          return res.status(400).json({ 
+            success: false, 
+            message: 'El Id_Usuario no coincide.',
+          });
+        }
+        for(usu of Usuario){
+          if(usu.Id_Usuario == Number(data.Id_Usuario)){
+            if(usu.Tipo === data.Tipo){
+              if(usu.Tipo != "Encargado"){
+                return res.status(400).json({ 
+                  success: false, 
+                  message: 'No hubo cambio.',
+                });
+              }else{
+                for(ut of Usuario_Encar){
+                  if(ut.Id_Usuario === Number(data.Id_Usuario)){
+                    ut.Id_Cafeteria = Number(data.Id_Cafeteria); 
+                    ut.Id_Sucursal = Number(data.Id_Sucursal); 
+                  }
+                }
+                const jsonString = JSON.stringify(Usuario_Encar); 
+                fs.writeFile(path.join(nfsPath, 'TUsuario_Encar.json'), jsonString); 
+                return res.status(200).json({ 
+                  success: true, 
+                  message: 'Se ha cambiado el Encargado.',
+                  usuario: data.Id_Usuario
+                });
               }
             }
-            const jsonString = JSON.stringify(Usuario_Encar); 
-            fs.writeFile(path.join(nfsPath, 'TUsuario_Encar.json'), jsonString); 
-            return res.status(200).json({ 
-              success: true, 
-              message: 'Se ha cambiado el Encargado.',
-              usuario: data.Id_Usuario
-            });
+            if(usu.Tipo === "Encargado"){
+              const index = Usuario_Encar.findIndex(rel => rel.Id_Usuario === Number(data.Id_Usuario));
+              Usuario_Encar.splice(index,1); 
+              let jsonString = JSON.stringify(Usuario_Encar); 
+              fs.writeFile(path.join(nfsPath, 'TUsuario_Encar.json'), jsonString);
+              for(usu of Usuario){
+                if(usu.Id_Usuario === Number(data.Id_Usuario)){
+                  usu.Tipo = data.Tipo; 
+                }
+              }
+
+              //jsonString = JSON.stringify(Usuario); 
+              const SECRET_KEY = crypto.randomBytes(32);
+              const IV = crypto.randomBytes(16);
+              const contenidoEncriptado = encriptarArchivo(Usuario, SECRET_KEY, IV);
+              const archivoFinal = JSON.stringify({
+                [ENCRYPTION_MARKER]: true,
+                contenido: contenidoEncriptado,
+                iv: IV.toString('hex'),
+                key: SECRET_KEY.toString('hex')
+              });
+
+              fs.writeFile(path.join(nfsPath, 'TUsuario.json'), archivoFinal);
+
+              return res.status(200).json({ 
+                success: true, 
+                message: 'Se ha actualizado.',
+                usuario: data.Id_Usuario
+              });
+            }else if(data.Tipo === "Encargado"){
+              Usuario_Encar.push({Id_Usuario: Number(data.Id_Usuario), Id_Cafeteria: Number(data.Id_Cafeteria), Id_Sucursal: Number(data.Id_Sucursal)}); 
+              let jsonString = JSON.stringify(Usuario_Encar); 
+              fs.writeFile(path.join(nfsPath, 'TUsuario_Encar.json'), jsonString); 
+              for(usu of Usuario){
+                if(usu.Id_Usuario === Number(data.Id_Usuario)){
+                  usu.Tipo = data.Tipo; 
+                }
+              }
+              
+              //jsonString = JSON.stringify(Usuario);
+              const SECRET_KEY = crypto.randomBytes(32);
+              const IV = crypto.randomBytes(16);
+              const contenidoEncriptado = encriptarArchivo(Usuario, SECRET_KEY, IV);
+              const archivoFinal = JSON.stringify({
+                [ENCRYPTION_MARKER]: true,
+                contenido: contenidoEncriptado,
+                iv: IV.toString('hex'),
+                key: SECRET_KEY.toString('hex')
+              });
+              fs.writeFile(path.join(nfsPath, 'TUsuario.json'), archivoFinal);
+
+              return res.status(200).json({ 
+                success: true, 
+                message: 'Se ha cambiado a encargado.',
+                usuario: data.Id_Usuario
+              });
+            }else{
+              for(usu of Usuario){
+                if(usu.Id_Usuario === Number(data.Id_Usuario)){
+                  usu.Tipo = data.Tipo; 
+                }
+              }
+              //jsonString = JSON.stringify(Usuario); 
+              const SECRET_KEY = crypto.randomBytes(32);
+              const IV = crypto.randomBytes(16);
+              const contenidoEncriptado = encriptarArchivo(Usuario, SECRET_KEY, IV);
+              const archivoFinal = JSON.stringify({
+                [ENCRYPTION_MARKER]: true,
+                contenido: contenidoEncriptado,
+                iv: IV.toString('hex'),
+                key: SECRET_KEY.toString('hex')
+              });
+              fs.writeFile(path.join(nfsPath, 'TUsuario.json'), archivoFinal);
+
+              return res.status(200).json({ 
+                success: true, 
+                message: 'Se ha cambiado a el tipo.',
+                usuario: data.Id_Usuario
+              });
+            }
           }
         }
-        if(usu.Tipo === "Encargado"){
-          const index = Usuario_Encar.findIndex(rel => rel.Id_Usuario === Number(data.Id_Usuario));
-          Usuario_Encar.splice(index,1); 
-          let jsonString = JSON.stringify(Usuario_Encar); 
-          fs.writeFile(path.join(nfsPath, 'TUsuario_Encar.json'), jsonString);
-          for(usu of Usuario){
-            if(usu.Id_Usuario === Number(data.Id_Usuario)){
-              usu.Tipo = data.Tipo; 
-            }
-          }
-          jsonString = JSON.stringify(Usuario); 
-          fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString);
-
-          return res.status(200).json({ 
-            success: true, 
-            message: 'Se ha actualizado.',
-            usuario: data.Id_Usuario
-          });
-        }else if(data.Tipo === "Encargado"){
-          Usuario_Encar.push({Id_Usuario: Number(data.Id_Usuario), Id_Cafeteria: Number(data.Id_Cafeteria), Id_Sucursal: Number(data.Id_Sucursal)}); 
-          let jsonString = JSON.stringify(Usuario_Encar); 
-          fs.writeFile(path.join(nfsPath, 'TUsuario_Encar.json'), jsonString); 
-          for(usu of Usuario){
-            if(usu.Id_Usuario === Number(data.Id_Usuario)){
-              usu.Tipo = data.Tipo; 
-            }
-          }
-          jsonString = JSON.stringify(Usuario); 
-          fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString);
-
-          return res.status(200).json({ 
-            success: true, 
-            message: 'Se ha cambiado a encargado.',
-            usuario: data.Id_Usuario
-          });
-        }else{
-          for(usu of Usuario){
-            if(usu.Id_Usuario === Number(data.Id_Usuario)){
-              usu.Tipo = data.Tipo; 
-            }
-          }
-          jsonString = JSON.stringify(Usuario); 
-          fs.writeFile(path.join(nfsPath, 'TUsuario.json'), jsonString);
-          return res.status(200).json({ 
-            success: true, 
-            message: 'Se ha cambiado a el tipo.',
-            usuario: data.Id_Usuario
-          });
-        }
-      }
-    }
-
-
-
-
-  } catch (err) {
-    console.error('Error al procesar los datos:', err);
-    //console.log('Datos recibidos:', req.body);
-    res.status(500).json({ error: 'Error al cargar los datos' });
-}}); 
+      } catch (err) {
+        console.error('Error al procesar los datos:', err);
+        //console.log('Datos recibidos:', req.body);
+        res.status(500).json({ error: 'Error al cargar los datos' });
+    }});
   
-  
-    
     app.get('/telefonos/encargados', async (req, res) => {
       try {
         const TUsuario = await desencriptarArchivoUsuarios();
@@ -1323,6 +1363,34 @@ app.post('/usuario/cambiar', async (req, res) => {
         });
       }
   });
+
+  app.get('/usuarios', async (req, res) => {
+    try {
+      // Desencriptar archivo TUsuario.json
+      const usuarios = await desencriptarArchivoUsuarios();
+  
+      // Validar que el contenido sea un array
+      if (!Array.isArray(usuarios)) {
+        return res.status(500).json({
+          success: false,
+          error: 'El archivo TUsuario no contiene una lista válida de usuarios',
+        });
+      }
+  
+      // Responder con los datos desencriptados de los usuarios
+      res.status(200).json({
+        success: true,
+        usuarios,
+      });
+    } catch (err) {
+      console.error('Error al obtener usuarios desencriptados:', err);
+      res.status(500).json({
+        success: false,
+        error: 'Error al obtener los datos de los usuarios',
+        mensaje: err.message,
+      });
+    }
+  });  
   
 // Iniciar el servidor
 app.listen(PORT, async () => {
