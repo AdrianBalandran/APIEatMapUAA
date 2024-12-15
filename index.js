@@ -1085,6 +1085,32 @@ app.get('/cafeusu/todos', async (req, res) => {
         };
     });
   
+    console.log(cafeteria);
+    res.json(cafeteria);
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    //console.log('Datos recibidos:', req.body);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+}}); 
+
+app.get('/cafeusu/cafeterias', async (req, res) => {
+  try {
+    // Leer el archivo
+    const Cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+    const Sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+    const CafeSucu = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+
+    const cafeteria = Cafeterias
+    .map(cafeteria => { 
+        return {
+          Id_Cafeteria: cafeteria.Id_Cafeteria,
+          Nombre_Cafeteria: cafeteria.Nombre, 
+        };
+    });
+  
+    console.log(cafeteria);
     res.json(cafeteria);
 
   } catch (err) {
@@ -1093,9 +1119,66 @@ app.get('/cafeusu/todos', async (req, res) => {
     res.status(500).json({ error: 'Error al cargar los datos' });
 }}); 
   
+app.post('/usuario/info', async (req, res) => {
+  try {
+    var data = req.body;
+
+    // Leer el archivo
+    const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+
+    const usuario = Usuarios
+    .filter(rel => rel.Id_Usuario !== Number(data.Id_Usuario))
+    .map(usuario => {
+          const NombreC = usuario.Nombre + " " + usuario.Primer_Apellido + " " + usuario.Segundo_Apellido;
+        return {
+          Nombre_Completo: NombreC, 
+          Id_Usuario: usuario.Id_Usuario
+        };
+    });
+  
+    res.json(usuario);
+
+  } catch (err) {
+    console.error('Error al procesar los datos:', err);
+    //console.log('Datos recibidos:', req.body);
+    res.status(500).json({ error: 'Error al cargar los datos' });
+  }}); 
+
+app.post('/cafeusu/Sucursal', async (req, res) => {
+try {
+
+  var cafe = req.body.Id_Usuario;
+  console.log(cafe);
+
+  // Leer el archivo
+  const Cafeterias = await readJsonFile(path.join(nfsPath, 'TCafeteria.json'));
+  const Sucursales = await readJsonFile(path.join(nfsPath, 'TSucursal.json'));
+  const CafeSucu = await readJsonFile(path.join(nfsPath, 'TCafeteriaSuc.json'));
+
+  const cafeteria = CafeSucu
+    .filter(rel => rel.Id_Cafeteria == cafe)
+    .map(sucCafe => {
+      console.log(sucCafe);
+        const sucursal = Sucursales.find(caf => caf.Id_Sucursal == sucCafe.Id_Sucursal);
+        return {
+          Nombre_Sucursal: sucursal.Nombre,
+          Id_Sucursal: sucursal.Id_Sucursal,
+        };
+    });
+
+
+  res.json(cafeteria);
+
+} catch (err) {
+  console.error('Error al procesar los datos:', err);
+  //console.log('Datos recibidos:', req.body);
+  res.status(500).json({ error: 'Error al cargar los datos' });
+}}); 
+
 app.post('/usuario/cambiar', async (req, res) => {
   try {
     var data = req.body;
+    console.log(data);
 
     // Leer el archivo
     const Usuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
