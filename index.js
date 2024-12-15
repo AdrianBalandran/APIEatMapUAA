@@ -1297,7 +1297,7 @@ app.post('/usuario/cambiar', async (req, res) => {
     
     app.get('/telefonos/encargados', async (req, res) => {
       try {
-        const TUsuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+        const TUsuario = await desencriptarArchivoUsuarios();
         const TUsuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
         
         const usuariosEncargados = TUsuario.filter(usuario => usuario.Tipo === "Encargado");
