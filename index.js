@@ -1225,7 +1225,8 @@ app.post('/usuario/info', async (req, res) => {
     var data = req.body;
 
     // Leer el archivo
-    const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    // const Usuarios = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const Usuario = await desencriptarArchivoUsuarios();
 
     const usuario = Usuarios
     .filter(rel => rel.Id_Usuario !== Number(data.Id_Usuario))
@@ -1282,7 +1283,9 @@ app.post('/usuario/cambiar', async (req, res) => {
     console.log(data);
 
     // Leer el archivo
-    const Usuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    // const Usuario = await readJsonFile(path.join(nfsPath, 'TUsuario.json'));
+    const Usuario = await desencriptarArchivoUsuarios();
+
     const Usuario_Encar = await readJsonFile(path.join(nfsPath, 'TUsuario_Encar.json'));
 
     if(!Usuario.find(rel => rel.Id_Usuario === Number(data.Id_Usuario))){
