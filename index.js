@@ -953,36 +953,62 @@ app.get('/buscar', async (req, res) => {
 
     switch (tipo.toLowerCase()) {
       case 'comida':
-        const comidasFiltradas = query.trim()
-          ? comidasData.filter(comida => comida.Nombre.toLowerCase().includes(query.toLowerCase()))
-          : comidasData;
+  const queryLowerComida = query.trim().toLowerCase();
 
-        resultados = comidasFiltradas.map(comida => {
-          const ingredientesDeLaComida = comidaIngreData
-            .filter(rel => rel.Id_Comida === comida.Id_Comida)
-            .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
+  // Filtro inicial por nombre de comida
+  const comidasFiltradas = queryLowerComida
+    ? comidasData.filter(comida => comida.Nombre.toLowerCase().includes(queryLowerComida))
+    : comidasData;
 
-          const sucursalesDisponibles = cafeteriaSucData
-            .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria)
-            .map(rel => {
-              const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
-              const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
-              return {
-                Cafeteria: cafeteria?.Nombre || null,
-                Sucursal: sucursal?.Nombre || null,
-                NumeroLocal: rel.Numero_Local,
-                Edificio: sucursal?.Edificio || null,
-              };
-            });
+  // Filtro adicional por cafetería o sucursal
+  const comidasPorCafeteriaSucursal = comidasData.filter(comida => {
+    const sucursalesDisponibles = cafeteriaSucData
+      .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria)
+      .map(rel => {
+        const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+        const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
+        return {
+          Cafeteria: cafeteria?.Nombre || '',
+          Sucursal: sucursal?.Nombre || ''
+        };
+      });
 
-          return {
-            ...comida,
-            Ingredientes: ingredientesDeLaComida,
-            Disponibilidad: sucursalesDisponibles,
-            TiempoPrepa: comida.TiempoPrepa,
-          };
-        });
-        break;
+    return sucursalesDisponibles.some(disponible =>
+      disponible.Cafeteria.toLowerCase().includes(queryLowerComida) ||
+      disponible.Sucursal.toLowerCase().includes(queryLowerComida)
+    );
+  });
+
+  // Combinar los resultados de ambos filtros
+  const comidasFinal = [...new Set([...comidasFiltradas, ...comidasPorCafeteriaSucursal])];
+
+  resultados = comidasFinal.map(comida => {
+    const ingredientesDeLaComida = comidaIngreData
+      .filter(rel => rel.Id_Comida === comida.Id_Comida)
+      .map(rel => ingredientesData.find(ing => ing.Id_Ingrediente === rel.Id_Ingrediente)?.Nombre);
+
+    const sucursalesDisponibles = cafeteriaSucData
+      .filter(rel => rel.Id_Cafeteria === comida.Id_Cafeteria)
+      .map(rel => {
+        const sucursal = sucursalesData.find(s => s.Id_Sucursal === rel.Id_Sucursal);
+        const cafeteria = cafeteriasData.find(c => c.Id_Cafeteria === rel.Id_Cafeteria);
+        return {
+          Cafeteria: cafeteria?.Nombre || null,
+          Sucursal: sucursal?.Nombre || null,
+          NumeroLocal: rel.Numero_Local,
+          Edificio: sucursal?.Edificio || null,
+        };
+      });
+
+    return {
+      ...comida,
+      Ingredientes: ingredientesDeLaComida,
+      Disponibilidad: sucursalesDisponibles,
+      TiempoPrepa: comida.TiempoPrepa,
+    };
+  });
+  break;
+
 
         case 'cafeteria':
           const queryLower = query.trim().toLowerCase();
