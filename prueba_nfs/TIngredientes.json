@@ -105,26 +105,78 @@
   },
   {
     "Id_Ingrediente": 27,
-    "Nombre": "Pan blanco"
+    "Nombre": "Té negro"
   },
   {
     "Id_Ingrediente": 28,
-    "Nombre": "Jitomate"
+    "Nombre": "Canela"
   },
   {
     "Id_Ingrediente": 29,
-    "Nombre": "Pan blanco"
+    "Nombre": "Jengibre"
   },
   {
     "Id_Ingrediente": 30,
-    "Nombre": "Jitomate"
+    "Nombre": "Manzana"
   },
   {
     "Id_Ingrediente": 31,
-    "Nombre": "Pan blanco"
+    "Nombre": "Chocolate"
   },
   {
     "Id_Ingrediente": 32,
-    "Nombre": "Jitomate"
+    "Nombre": "Vainilla"
+  },
+  {
+    "Id_Ingrediente": 33,
+    "Nombre": "Chocolate"
+  },
+  {
+    "Id_Ingrediente": 34,
+    "Nombre": "Plátano"
+  },
+  {
+    "Id_Ingrediente": 35,
+    "Nombre": "Papaya"
+  },
+  {
+    "Id_Ingrediente": 36,
+    "Nombre": "Crema dulce"
+  },
+  {
+    "Id_Ingrediente": 37,
+    "Nombre": "Chispas de chocolate"
+  },
+  {
+    "Id_Ingrediente": 38,
+    "Nombre": "Guisado"
+  },
+  {
+    "Id_Ingrediente": 39,
+    "Nombre": "Atún"
+  },
+  {
+    "Id_Ingrediente": 40,
+    "Nombre": "Carne de puerco"
+  },
+  {
+    "Id_Ingrediente": 41,
+    "Nombre": "Arroz"
+  },
+  {
+    "Id_Ingrediente": 42,
+    "Nombre": "Pescado"
+  },
+  {
+    "Id_Ingrediente": 43,
+    "Nombre": "Papas"
+  },
+  {
+    "Id_Ingrediente": 44,
+    "Nombre": "Limón"
+  },
+  {
+    "Id_Ingrediente": 45,
+    "Nombre": "Sprite"
   }
 ]
