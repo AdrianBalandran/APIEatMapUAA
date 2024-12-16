@@ -42,5 +42,89 @@
   {
     "Id_Ingrediente": 11,
     "Nombre": "Tamal"
-   }
+  },
+  {
+    "Id_Ingrediente": 12,
+    "Nombre": "Fresas"
+  },
+  {
+    "Id_Ingrediente": 13,
+    "Nombre": "Guayaba"
+  },
+  {
+    "Id_Ingrediente": 14,
+    "Nombre": "Melón"
+  },
+  {
+    "Id_Ingrediente": 15,
+    "Nombre": "Elote"
+  },
+  {
+    "Id_Ingrediente": 16,
+    "Nombre": "Pimientos"
+  },
+  {
+    "Id_Ingrediente": 17,
+    "Nombre": "Zanahoria"
+  },
+  {
+    "Id_Ingrediente": 18,
+    "Nombre": "Jamón"
+  },
+  {
+    "Id_Ingrediente": 19,
+    "Nombre": "Pan blanco"
+  },
+  {
+    "Id_Ingrediente": 20,
+    "Nombre": "Jitomate"
+  },
+  {
+    "Id_Ingrediente": 21,
+    "Nombre": "Tocino"
+  },
+  {
+    "Id_Ingrediente": 22,
+    "Nombre": "Salchicha"
+  },
+  {
+    "Id_Ingrediente": 23,
+    "Nombre": "Pan"
+  },
+  {
+    "Id_Ingrediente": 24,
+    "Nombre": "Agua"
+  },
+  {
+    "Id_Ingrediente": 25,
+    "Nombre": "Café"
+  },
+  {
+    "Id_Ingrediente": 26,
+    "Nombre": "Mango"
+  },
+  {
+    "Id_Ingrediente": 27,
+    "Nombre": "Pan blanco"
+  },
+  {
+    "Id_Ingrediente": 28,
+    "Nombre": "Jitomate"
+  },
+  {
+    "Id_Ingrediente": 29,
+    "Nombre": "Pan blanco"
+  },
+  {
+    "Id_Ingrediente": 30,
+    "Nombre": "Jitomate"
+  },
+  {
+    "Id_Ingrediente": 31,
+    "Nombre": "Pan blanco"
+  },
+  {
+    "Id_Ingrediente": 32,
+    "Nombre": "Jitomate"
+  }
 ]

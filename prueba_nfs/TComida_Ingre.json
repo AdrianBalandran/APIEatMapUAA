@@ -78,5 +78,97 @@
 {
  "Id_Ingrediente": 10,
  "Id_Comida": 8
+},
+{
+ "Id_Ingrediente": 12,
+ "Id_Comida": 9
+},
+{
+ "Id_Ingrediente": 13,
+ "Id_Comida": 9
+},
+{
+ "Id_Ingrediente": 14,
+ "Id_Comida": 9
+},
+{
+ "Id_Ingrediente": 3,
+ "Id_Comida": 10
+},
+{
+ "Id_Ingrediente": 1,
+ "Id_Comida": 10
+},
+{
+ "Id_Ingrediente": 17,
+ "Id_Comida": 10
+},
+{
+ "Id_Ingrediente": 16,
+ "Id_Comida": 10
+},
+{
+ "Id_Ingrediente": 15,
+ "Id_Comida": 10
+},
+{
+ "Id_Ingrediente": 18,
+ "Id_Comida": 11
+},
+{
+ "Id_Ingrediente": 19,
+ "Id_Comida": 11
+},
+{
+ "Id_Ingrediente": 20,
+ "Id_Comida": 11
+},
+{
+ "Id_Ingrediente": 18,
+ "Id_Comida": 12
+},
+{
+ "Id_Ingrediente": 4,
+ "Id_Comida": 12
+},
+{
+ "Id_Ingrediente": 20,
+ "Id_Comida": 12
+},
+{
+ "Id_Ingrediente": 3,
+ "Id_Comida": 12
+},
+{
+ "Id_Ingrediente": 21,
+ "Id_Comida": 13
+},
+{
+ "Id_Ingrediente": 22,
+ "Id_Comida": 13
+},
+{
+ "Id_Ingrediente": 23,
+ "Id_Comida": 13
+},
+{
+ "Id_Ingrediente": 22,
+ "Id_Comida": 14
+},
+{
+ "Id_Ingrediente": 24,
+ "Id_Comida": 15
+},
+{
+ "Id_Ingrediente": 25,
+ "Id_Comida": 15
+},
+{
+ "Id_Ingrediente": 24,
+ "Id_Comida": 16
+},
+{
+ "Id_Ingrediente": 26,
+ "Id_Comida": 16
 }
 ]
