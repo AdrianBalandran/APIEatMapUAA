@@ -134,5 +134,101 @@
   "Id_Cafeteria":9,
   "Id_Sucursal": 2,
   "TiempoPrepa":"5"
+},
+{
+  "Id_Comida": 18,
+  "Nombre":"Choco de Chocolate",
+  "Precio":36.00,
+  "Id_Cafeteria":10,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"7"
+},
+{
+  "Id_Comida": 19,
+  "Nombre":"Choco de Vainilla",
+  "Precio":36.00,
+  "Id_Cafeteria":10,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"7"
+},
+{
+  "Id_Comida": 20,
+  "Nombre":"Biónico",
+  "Precio":40.00,
+  "Id_Cafeteria":10,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"1"
+},
+{
+  "Id_Comida": 21,
+  "Nombre":"Taco",
+  "Precio":12.00,
+  "Id_Cafeteria":12,
+  "Id_Sucursal": 4,
+  "TiempoPrepa":"8"
+},
+{
+  "Id_Comida": 22,
+  "Nombre":"Chilaquiles Sencillos",
+  "Precio":40.00,
+  "Id_Cafeteria":12,
+  "Id_Sucursal": 4,
+  "TiempoPrepa":"10"
+},
+{
+  "Id_Comida": 23,
+  "Nombre":"Ensalada de Atún",
+  "Precio":45.00,
+  "Id_Cafeteria":12,
+  "Id_Sucursal": 4,
+  "TiempoPrepa":"10"
+},
+{
+  "Id_Comida": 24,
+  "Nombre":"Sincronizadas de Milanesa",
+  "Precio":60.00,
+  "Id_Cafeteria":12,
+  "Id_Sucursal": 4,
+  "TiempoPrepa":"15"
+},
+{
+  "Id_Comida": 25,
+  "Nombre":"Nígiri",
+  "Precio":45.00,
+  "Id_Cafeteria":5,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"20"
+},
+{
+  "Id_Comida": 26,
+  "Nombre":"Dedos de quedo",
+  "Precio":70.00,
+  "Id_Cafeteria":7,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"20"
+},
+{
+  "Id_Comida": 27,
+  "Nombre":"Papas Francesas",
+  "Precio":35.00,
+  "Id_Cafeteria":7,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"15"
+},
+{
+  "Id_Comida": 28,
+  "Nombre":"Limonada",
+  "Precio":40.00,
+  "Id_Cafeteria":7,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"10"
+}, 
+{
+  "Id_Comida": 29,
+  "Nombre":"Nígiri",
+  "Precio":45.00,
+  "Id_Cafeteria":5,
+  "Id_Sucursal": 3,
+  "TiempoPrepa":"20"
 }
 ]
