@@ -170,5 +170,149 @@
 {
  "Id_Ingrediente": 26,
  "Id_Comida": 16
+},
+{
+ "Id_Ingrediente": 27,
+ "Id_Comida": 17
+},
+{
+ "Id_Ingrediente": 28,
+ "Id_Comida": 17
+},
+{
+ "Id_Ingrediente": 29,
+ "Id_Comida": 17
+},
+{
+ "Id_Ingrediente": 30,
+ "Id_Comida": 17
+},
+{
+ "Id_Ingrediente": 31,
+ "Id_Comida": 18
+},
+{
+ "Id_Ingrediente": 28,
+ "Id_Comida": 18
+},
+{
+ "Id_Ingrediente": 33,
+ "Id_Comida": 18
+},
+{
+ "Id_Ingrediente": 32,
+ "Id_Comida": 19
+},
+{
+ "Id_Ingrediente": 28,
+ "Id_Comida": 19
+},
+{
+ "Id_Ingrediente": 33,
+ "Id_Comida": 19
+},
+{
+ "Id_Ingrediente": 37,
+ "Id_Comida": 20
+},
+{
+ "Id_Ingrediente": 36,
+ "Id_Comida": 20
+},
+{
+ "Id_Ingrediente": 35,
+ "Id_Comida": 20
+},
+{
+ "Id_Ingrediente": 34,
+ "Id_Comida": 20
+},
+{
+ "Id_Ingrediente": 30,
+ "Id_Comida": 20
+},
+{
+ "Id_Ingrediente": 14,
+ "Id_Comida": 20
+},
+{
+ "Id_Ingrediente": 9,
+ "Id_Comida": 21
+},
+{
+ "Id_Ingrediente": 38,
+ "Id_Comida": 21
+},
+{
+ "Id_Ingrediente": 9,
+ "Id_Comida": 22
+},
+{
+ "Id_Ingrediente": 7,
+ "Id_Comida": 22
+},
+{
+ "Id_Ingrediente": 4,
+ "Id_Comida": 22
+},
+{
+ "Id_Ingrediente": 8,
+ "Id_Comida": 22
+},
+{
+ "Id_Ingrediente": 3,
+ "Id_Comida": 23
+},
+{
+ "Id_Ingrediente": 20,
+ "Id_Comida": 23
+},
+{
+ "Id_Ingrediente": 16,
+ "Id_Comida": 23
+},
+{
+  "Id_Ingrediente": 39,
+  "Id_Comida": 23
+},
+{
+ "Id_Ingrediente": 40,
+ "Id_Comida": 24
+},
+{
+ "Id_Ingrediente": 9,
+ "Id_Comida": 24
+},
+{
+ "Id_Ingrediente": 4,
+ "Id_Comida": 24
+},
+{
+ "Id_Ingrediente": 41,
+ "Id_Comida": 25
+},
+{
+ "Id_Ingrediente": 42,
+ "Id_Comida": 25
+},
+{
+ "Id_Ingrediente": 4,
+ "Id_Comida": 26
+},
+{
+ "Id_Ingrediente": 43,
+ "Id_Comida": 27
+},
+{
+ "Id_Ingrediente": 44,
+ "Id_Comida": 28
+},
+{
+ "Id_Ingrediente": 45,
+ "Id_Comida": 28
+},
+{
+ "Id_Ingrediente": 24,
+ "Id_Comida": 28
 }
 ]
