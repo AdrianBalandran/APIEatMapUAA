@@ -314,5 +314,9 @@
 {
  "Id_Ingrediente": 24,
  "Id_Comida": 28
+},
+{
+ "Id_Ingrediente": 41,
+ "Id_Comida": 29
 }
 ]

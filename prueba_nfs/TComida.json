@@ -193,7 +193,7 @@
 },
 {
   "Id_Comida": 25,
-  "Nombre":"Nígiri",
+  "Nombre":"Nígiri de pulpo",
   "Precio":45.00,
   "Id_Cafeteria":5,
   "Id_Sucursal": 3,
@@ -225,7 +225,7 @@
 }, 
 {
   "Id_Comida": 29,
-  "Nombre":"Nígiri",
+  "Nombre":"Nígiri de camarón",
   "Precio":45.00,
   "Id_Cafeteria":5,
   "Id_Sucursal": 3,
